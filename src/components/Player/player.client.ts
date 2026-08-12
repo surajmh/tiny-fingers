@@ -321,7 +321,7 @@ window.addEventListener('pointerdown', (event) => {
 window.addEventListener('keydown', (event) => {
   if (settings.open) return;
 
-  if (event.key === 'Escape' || event.key === 'Enter') {
+  if (event.key === 'Escape') {
     if (started) {
       event.preventDefault();
       stopPlay();
@@ -335,7 +335,15 @@ window.addEventListener('keydown', (event) => {
     parentSequence = '';
     return;
   }
-  if (!started) return;
+
+  if (!started) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      begin();
+    }
+    return;
+  }
+
   event.preventDefault();
   smash(getGlyph(event.key));
 }, { capture: true });
