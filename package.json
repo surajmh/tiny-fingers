@@ -7,9 +7,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test src/components/Player/player.helpers.spec.ts"
+    "test": "node --test src/components/Player/player.helpers.spec.ts",
+    "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
     "astro": "7.1.6"
+  },
+  "devDependencies": {
+    "wrangler": "^3.107.0"
   }
 }
