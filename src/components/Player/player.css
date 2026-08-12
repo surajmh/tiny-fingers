@@ -1,0 +1,336 @@
+@layer reset, player;
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  button, input { font: inherit; }
+}
+
+@layer player {
+  :root { color-scheme: dark; font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", system-ui, sans-serif; }
+  body { background: #07101f; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  .player {
+    --background: #07101f;
+    --panel: #101d31;
+    --panel-strong: #1c3451;
+    --ink: #f6f9ff;
+    --muted: #c3d0e3;
+    --accent: #65d8ff;
+    --accent-2: #ffd84d;
+    position: fixed;
+    inset: 0;
+    isolation: isolate;
+    overflow: hidden;
+    color: var(--ink);
+    background-color: var(--background);
+    touch-action: none;
+    user-select: none;
+  }
+  .player[data-theme="candy"] { --background: #35102f; --panel: #5b194a; --panel-strong: #7b2765; --accent: #ff91c8; --accent-2: #8ff0ff; }
+  .player[data-theme="ocean"] { --background: #03263a; --panel: #064665; --panel-strong: #08678b; --accent: #72e6d1; --accent-2: #ffdd78; }
+  .player[data-theme="jungle"] { --background: #09281e; --panel: #154936; --panel-strong: #23664a; --accent: #88ee81; --accent-2: #ffd65c; }
+  .player[data-theme="sunset"] { --background: #2f1535; --panel: #5b2748; --panel-strong: #81384b; --accent: #ff9b61; --accent-2: #ffe070; }
+
+  /* Zero-lag GPU hardware-accelerated animated backgrounds */
+  .bg-fx {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+    contain: strict;
+  }
+  .bg-glow, .bg-stars {
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  /* ----------------------------------------------------
+     1. GALAXY (Deep cosmic spiral with drifting stars)
+     ---------------------------------------------------- */
+  .player[data-bg-motion="galaxy"] .bg-glow,
+  .player:not([data-bg-motion]) .bg-glow {
+    background:
+      radial-gradient(ellipse at 35% 35%, rgb(101 216 255 / 0.35) 0%, transparent 45%),
+      radial-gradient(ellipse at 65% 65%, rgb(159 122 234 / 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgb(255 111 145 / 0.28) 0%, transparent 40%),
+      radial-gradient(circle at 75% 25%, rgb(98 230 167 / 0.25) 0%, transparent 35%);
+    filter: blur(40px);
+    animation: galaxySpin 16s linear infinite;
+  }
+  .player[data-bg-motion="galaxy"] .bg-stars,
+  .player:not([data-bg-motion]) .bg-stars {
+    background-image:
+      radial-gradient(circle at 15% 20%, #ffffff 0 1.5px, transparent 3px),
+      radial-gradient(circle at 75% 15%, #ffffff 0 2px, transparent 4px),
+      radial-gradient(circle at 40% 70%, #65d8ff 0 1.5px, transparent 3px),
+      radial-gradient(circle at 85% 80%, #ffd84d 0 2px, transparent 4px),
+      radial-gradient(circle at 25% 85%, #ffffff 0 1.5px, transparent 3px),
+      radial-gradient(circle at 60% 40%, #ff6f91 0 1.8px, transparent 3.5px);
+    background-size: 220px 220px, 320px 320px, 260px 260px, 380px 380px, 170px 170px, 290px 290px;
+    animation: galaxyDrift 14s linear infinite;
+  }
+
+  /* ----------------------------------------------------
+     2. BUBBLES (Large & small floating shiny bubble rings)
+     ---------------------------------------------------- */
+  .player[data-bg-motion="bubbles"] .bg-glow {
+    background:
+      radial-gradient(circle at 30% 60%, rgb(114 230 209 / 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 70% 30%, rgb(255 145 200 / 0.32) 0%, transparent 55%),
+      radial-gradient(circle at 50% 80%, rgb(101 216 255 / 0.25) 0%, transparent 45%);
+    filter: blur(35px);
+    animation: bubbleGlowPulse 8s ease-in-out infinite alternate;
+  }
+  .player[data-bg-motion="bubbles"] .bg-stars {
+    background-image:
+      radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.8) 0 4px, transparent 5px, rgb(255 255 255 / 0.4) 12px, transparent 15px),
+      radial-gradient(circle at 50% 50%, rgb(101 216 255 / 0.8) 0 6px, transparent 7px, rgb(101 216 255 / 0.35) 20px, transparent 24px),
+      radial-gradient(circle at 50% 50%, rgb(255 145 200 / 0.85) 0 8px, transparent 9px, rgb(255 145 200 / 0.4) 28px, transparent 32px),
+      radial-gradient(circle at 50% 50%, rgb(255 216 77 / 0.75) 0 5px, transparent 6px, rgb(255 216 77 / 0.3) 16px, transparent 19px);
+    background-size: 180px 240px, 280px 360px, 340px 420px, 220px 300px;
+    background-position: 10% 20%, 65% 40%, 35% 80%, 80% 90%;
+    animation: bubbleFloat 7s linear infinite;
+  }
+
+  /* ----------------------------------------------------
+     3. AURORA (Wavy shimmering luminous curtain ribbons)
+     ---------------------------------------------------- */
+  .player[data-bg-motion="aurora"] .bg-glow {
+    background:
+      linear-gradient(135deg, transparent 20%, rgb(98 230 167 / 0.4) 40%, rgb(101 216 255 / 0.45) 55%, rgb(159 122 234 / 0.4) 70%, transparent 85%),
+      radial-gradient(ellipse at 50% 30%, rgb(114 230 209 / 0.35) 0%, transparent 60%);
+    filter: blur(35px);
+    animation: auroraWave 8s ease-in-out infinite alternate;
+  }
+  .player[data-bg-motion="aurora"] .bg-stars {
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 40px, rgb(255 255 255 / 0.08) 40px 70px, transparent 70px 140px, rgb(101 216 255 / 0.12) 140px 190px, transparent 190px 260px),
+      radial-gradient(circle at 30% 40%, #ffffff 0 2px, transparent 4px),
+      radial-gradient(circle at 70% 60%, #65d8ff 0 2.5px, transparent 5px);
+    background-size: 100% 100%, 250px 250px, 320px 320px;
+    animation: auroraCurtain 6s ease-in-out infinite alternate;
+  }
+
+  /* ----------------------------------------------------
+     4. STARFIELD (Dense high-contrast rushing warp stars)
+     ---------------------------------------------------- */
+  .player[data-bg-motion="stars"] .bg-glow {
+    background:
+      radial-gradient(circle at 50% 50%, rgb(101 216 255 / 0.5) 0%, rgb(159 122 234 / 0.3) 30%, transparent 65%);
+    filter: blur(30px);
+    animation: starCorePulse 4s ease-in-out infinite alternate;
+  }
+  .player[data-bg-motion="stars"] .bg-stars {
+    background-image:
+      radial-gradient(circle at 10% 10%, #ffffff 0 2px, transparent 3px),
+      radial-gradient(circle at 30% 45%, #ffd84d 0 2.5px, transparent 4px),
+      radial-gradient(circle at 60% 20%, #65d8ff 0 2px, transparent 3.5px),
+      radial-gradient(circle at 80% 75%, #ffffff 0 3px, transparent 5px),
+      radial-gradient(circle at 45% 85%, #ff6f91 0 2px, transparent 3.5px),
+      radial-gradient(circle at 90% 30%, #62e6a7 0 2.5px, transparent 4px),
+      radial-gradient(circle at 20% 80%, #ffffff 0 1.5px, transparent 3px);
+    background-size: 130px 130px, 190px 190px, 160px 160px, 240px 240px, 150px 150px, 210px 210px, 110px 110px;
+    animation: warpSpeed 8s linear infinite;
+  }
+
+  /* ----------------------------------------------------
+     5. EMBERS (Floating warm glowing sparks & firelight)
+     ---------------------------------------------------- */
+  .player[data-bg-motion="embers"] .bg-glow {
+    background:
+      radial-gradient(ellipse at 50% 85%, rgb(255 111 67 / 0.5) 0%, rgb(255 193 7 / 0.3) 35%, transparent 65%),
+      radial-gradient(circle at 30% 70%, rgb(244 67 54 / 0.3) 0%, transparent 45%),
+      radial-gradient(circle at 70% 70%, rgb(255 152 0 / 0.35) 0%, transparent 50%);
+    filter: blur(35px);
+    animation: fireGlow 5s ease-in-out infinite alternate;
+  }
+  .player[data-bg-motion="embers"] .bg-stars {
+    background-image:
+      radial-gradient(circle at 20% 80%, #ffd84d 0 3px, transparent 6px),
+      radial-gradient(circle at 70% 90%, #ff7043 0 4px, transparent 7px),
+      radial-gradient(circle at 40% 75%, #ffca28 0 3.5px, transparent 6px),
+      radial-gradient(circle at 85% 65%, #ffab40 0 2.5px, transparent 5px),
+      radial-gradient(circle at 15% 50%, #ffe082 0 3px, transparent 5px);
+    background-size: 160px 260px, 240px 340px, 200px 300px, 280px 380px, 140px 220px;
+    animation: embersRise 6s linear infinite;
+  }
+
+  /* Keyframe Animations (strictly compositor transform & opacity) */
+  @keyframes galaxySpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.08); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  @keyframes galaxyDrift {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-180px, -180px, 0); }
+  }
+  @keyframes bubbleGlowPulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.12); opacity: 1; }
+  }
+  @keyframes bubbleFloat {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-40px, -280px, 0); }
+  }
+  @keyframes auroraWave {
+    0% { transform: translate3d(-30px, 0, 0) scale(1); }
+    50% { transform: translate3d(40px, -20px, 0) scale(1.08); }
+    100% { transform: translate3d(-20px, 30px, 0) scale(0.95); }
+  }
+  @keyframes auroraCurtain {
+    0% { transform: translate3d(0, 0, 0) skewX(0deg); opacity: 0.7; }
+    50% { transform: translate3d(60px, -20px, 0) skewX(4deg); opacity: 1; }
+    100% { transform: translate3d(-40px, 20px, 0) skewX(-4deg); opacity: 0.75; }
+  }
+  @keyframes starCorePulse {
+    0% { transform: scale(0.9); opacity: 0.6; }
+    100% { transform: scale(1.2); opacity: 1; }
+  }
+  @keyframes warpSpeed {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-240px, -240px, 0); }
+  }
+  @keyframes fireGlow {
+    0% { transform: translate3d(0, 10px, 0) scale(1); opacity: 0.75; }
+    100% { transform: translate3d(0, -20px, 0) scale(1.1); opacity: 1; }
+  }
+  @keyframes embersRise {
+    0% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(30px, -150px, 0); }
+    100% { transform: translate3d(-20px, -300px, 0); }
+  }
+
+  .player.no-bg-animation .bg-glow,
+  .player.no-bg-animation .bg-stars {
+    animation: none !important;
+  }
+
+  #stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+
+  .settings-button {
+    position: fixed;
+    z-index: 2;
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--muted);
+    background: var(--panel);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+  .settings-button:hover {
+    color: var(--ink);
+    background: var(--panel-strong);
+    border-color: var(--accent);
+    transform: rotate(25deg) scale(1.08);
+  }
+
+  .score {
+    position: fixed;
+    top: max(1rem, env(safe-area-inset-top));
+    right: max(1rem, env(safe-area-inset-right));
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.6rem 0.45rem 0.85rem;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    border-radius: 999px;
+    font-size: clamp(0.72rem, 1.6vw, 0.9rem);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .score p:last-child { padding: 0.25rem 0.55rem; color: #18233a; background: var(--accent-2); border-radius: 999px; }
+
+  .welcome {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background: rgb(4 10 22 / 0.45);
+  }
+  .welcome[hidden] { display: none; }
+
+  .start-button {
+    padding: clamp(1.25rem, 3.5vw, 2rem) clamp(2.5rem, 6vw, 4.5rem);
+    border: 0;
+    border-radius: 999px;
+    color: #081426;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    font-size: clamp(1.75rem, 4.5vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    box-shadow: 0 10px 30px -5px rgb(0 0 0 / 0.5), 0 0 25px rgb(101 216 255 / 0.4);
+    animation: smashPulse 2.4s ease-in-out infinite;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), filter 160ms ease;
+  }
+  .start-button:hover {
+    transform: scale(1.08);
+    filter: brightness(1.12);
+  }
+  .start-button:active {
+    transform: scale(0.96);
+  }
+
+  @keyframes smashPulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 10px 30px -5px rgb(0 0 0 / 0.5), 0 0 20px rgb(101 216 255 / 0.4);
+    }
+    50% {
+      transform: scale(1.06);
+      box-shadow: 0 16px 40px -5px rgb(0 0 0 / 0.6), 0 0 45px rgb(101 216 255 / 0.7);
+    }
+  }
+
+  .settings { width: min(620px, calc(100% - 2rem)); max-height: min(720px, calc(100% - 2rem)); margin: auto; padding: 0; color: var(--ink); background: var(--panel); border: 0; border-radius: 16px; }
+  .settings::backdrop { background: rgb(2 7 16 / 0.82); }
+  .settings form { display: grid; gap: 1.5rem; padding: clamp(1.25rem, 4vw, 2rem); }
+  .settings header { display: flex; align-items: start; justify-content: space-between; gap: 2rem; }
+  .settings header p { color: var(--accent); font-size: 0.85rem; font-weight: 800; }
+  .settings h2 { font-size: clamp(1.8rem, 5vw, 2.6rem); letter-spacing: -0.03em; }
+  .close-button { width: 2.5rem; height: 2.5rem; color: var(--ink); background: transparent; border: 1px solid rgb(255 255 255 / 0.22); border-radius: 50%; font-size: 1.6rem; cursor: pointer; }
+  .settings fieldset { padding: 0; border: 0; }
+  .settings legend { margin-bottom: 0.75rem; font-weight: 800; }
+  .theme-list, .sound-list, .bg-motion-list { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .theme-list button, .sound-list button, .bg-motion-list button, .settings-actions button { padding: 0.65rem 0.85rem; color: var(--ink); background: var(--panel-strong); border: 1px solid transparent; border-radius: 10px; font-weight: 750; cursor: pointer; transition: background 150ms ease, color 150ms ease, transform 150ms ease; }
+  .theme-list button:hover, .sound-list button:hover, .bg-motion-list button:hover { transform: translateY(-1px); }
+  .theme-list button[aria-pressed="true"], .sound-list button[aria-pressed="true"], .bg-motion-list button[aria-pressed="true"] { color: #081426; background: var(--accent); font-weight: 850; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .switch-row span { display: grid; }
+  .switch-row small { color: var(--muted); }
+  .switch-row input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent); }
+  .settings-actions { display: flex; justify-content: space-between; gap: 1rem; }
+  .settings-actions .done-button { color: #081426; background: var(--accent); }
+  noscript { position: fixed; inset: auto 1rem 1rem; padding: 1rem; color: #081426; background: var(--accent-2); }
+}
+
+@media (max-width: 620px) {
+  .score { top: auto; right: 0.65rem; bottom: max(0.65rem, env(safe-area-inset-bottom)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-button { animation: none; transition: none; }
+  .settings-button { transition: none; }
+  .bg-glow, .bg-stars { animation: none !important; }
+}

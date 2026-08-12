@@ -1,0 +1,79 @@
+---
+import { BG_ANIMATIONS, SOUNDS, THEMES } from './player.constants';
+import './player.css';
+---
+
+<div class="player" data-theme="space" data-bg-motion="galaxy">
+  <div class="bg-fx" aria-hidden="true">
+    <div class="bg-glow"></div>
+    <div class="bg-stars"></div>
+  </div>
+  <canvas id="stage" aria-label="TinyFingers animation canvas"></canvas>
+
+  <section class="score" aria-label="Live score">
+    <p>Keys smashed: <strong id="score-count">0</strong></p>
+    <p id="chaos-label">Tiny chaos</p>
+  </section>
+
+  <button class="settings-button" id="settings-button" aria-label="Parent controls" title="Parent controls">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
+
+  <section class="welcome" id="welcome">
+    <button class="start-button" id="start-button">Start smashing!</button>
+  </section>
+
+  <dialog class="settings" id="settings" aria-labelledby="settings-title">
+    <form method="dialog">
+      <header>
+        <div><p>Grown-ups only</p><h2 id="settings-title">Parent controls</h2></div>
+        <button class="close-button" value="close" aria-label="Close parent controls">×</button>
+      </header>
+
+      <fieldset>
+        <legend>Choose a world</legend>
+        <div class="theme-list">
+          {THEMES.map((theme, index) => (
+            <button type="button" data-theme-choice={theme.id} aria-pressed={index === 0 ? 'true' : 'false'}>{theme.label}</button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Background motion</legend>
+        <div class="bg-motion-list">
+          {BG_ANIMATIONS.map((bg, index) => (
+            <button type="button" data-bg-choice={bg.id} aria-pressed={index === 0 ? 'true' : 'false'}>{bg.label}</button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Sound instrument</legend>
+        <div class="sound-list">
+          {SOUNDS.map((sound, index) => (
+            <button type="button" data-sound-choice={sound.id} aria-pressed={index === 0 ? 'true' : 'false'}>{sound.label}</button>
+          ))}
+        </div>
+      </fieldset>
+
+      <label class="switch-row"><span><strong>Animated background</strong><small>Gentle moving galaxy & theme effects</small></span><input id="bg-animation-toggle" type="checkbox" checked /></label>
+      <label class="switch-row"><span><strong>Sound</strong><small>Short, gentle synthesized notes</small></span><input id="sound-toggle" type="checkbox" checked /></label>
+      <label class="switch-row"><span><strong>Reduced effects</strong><small>Fewer shapes on slower devices</small></span><input id="effects-toggle" type="checkbox" /></label>
+
+      <div class="settings-actions">
+        <button type="button" id="reset-score">Reset score</button>
+        <button class="done-button" value="close">Back to play</button>
+      </div>
+    </form>
+  </dialog>
+
+  <noscript>TinyFingers needs JavaScript to react to keyboard and touch input.</noscript>
+</div>
+
+<script>
+  import './player.client';
+</script>
