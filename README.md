@@ -1,6 +1,7 @@
 # TinyFingers
 
 A fast fullscreen keyboard, pointer, and touch toy for toddlers, built with Astro and the Canvas API.
+First change
 
 ```sh
 npm install
