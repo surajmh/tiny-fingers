@@ -135,31 +135,10 @@ refreshSpeechVoices();
 if ('speechSynthesis' in window) window.speechSynthesis.addEventListener('voiceschanged', refreshSpeechVoices);
 if (reducedEffects) player.classList.add('no-bg-animation');
 
-function initVirtualKeyboard(): void {
-  const template = document.getElementById('virtual-keyboard-template') as HTMLTemplateElement;
-  if (!template) return;
-  
-  const clone = template.content.cloneNode(true) as DocumentFragment;
-  virtualKeyboard.appendChild(clone);
-  
-  for (const button of virtualKeyboard.querySelectorAll<HTMLButtonElement>('[data-play-key]')) {
-    button.addEventListener('pointerdown', () => playVirtualKey(button));
-    button.addEventListener('click', (event) => {
-      if (event.detail === 0) playVirtualKey(button);
-    });
-  }
-}
-
 function updateVirtualKeyboardVisibility(): void {
   const visible = shouldShowVirtualKeyboard(started, tabletTouchDevice.matches);
-  
-  if (visible && !virtualKeyboard.querySelector('.virtual-keyboard-rows')) {
-    initVirtualKeyboard();
-    // Force reflow so the transition happens from the initial state
-    virtualKeyboard.getBoundingClientRect();
-  }
-  
   player.classList.toggle('show-virtual-keyboard', visible);
+  virtualKeyboard.toggleAttribute('inert', !visible);
   virtualKeyboard.setAttribute('aria-hidden', String(!visible));
 }
 
@@ -672,6 +651,12 @@ document.addEventListener('fullscreenchange', () => {
   }
 });
 
+for (const button of document.querySelectorAll<HTMLButtonElement>('[data-play-key]')) {
+  button.addEventListener('pointerdown', () => playVirtualKey(button));
+  button.addEventListener('click', (event) => {
+    if (event.detail === 0) playVirtualKey(button);
+  });
+}
 
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')) {
   button.addEventListener('click', () => {

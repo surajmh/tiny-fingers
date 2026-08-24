@@ -10,23 +10,21 @@ import './player.css';
   </div>
   <canvas id="stage" aria-label="TinyFingers animation canvas"></canvas>
 
-  <section class="virtual-keyboard" aria-label="Touch keyboard">
-    <template id="virtual-keyboard-template">
-      <div class="virtual-keyboard-rows">
-        {VIRTUAL_KEYBOARD_ROWS.map((row) => (
-          <div class="virtual-keyboard-row">
-            {row.map((key) => (
-              <button class="virtual-key" type="button" data-play-key={key.key} aria-label={`Play ${key.label}`}>{key.label}</button>
-            ))}
-          </div>
-        ))}
-        <div class="virtual-keyboard-row virtual-keyboard-actions">
-          {VIRTUAL_KEYBOARD_ACTIONS.map((key) => (
-            <button class:list={['virtual-key', key.className]} type="button" data-play-key={key.key} aria-label={key.ariaLabel}>{key.label}</button>
+  <section class="virtual-keyboard" aria-label="Touch keyboard" aria-hidden="true" inert>
+    <div class="virtual-keyboard-rows">
+      {VIRTUAL_KEYBOARD_ROWS.map((row) => (
+        <div class="virtual-keyboard-row">
+          {row.map((key) => (
+            <button class="virtual-key" type="button" data-play-key={key.key} aria-label={`Play ${key.label}`}>{key.label}</button>
           ))}
         </div>
+      ))}
+      <div class="virtual-keyboard-row virtual-keyboard-actions">
+        {VIRTUAL_KEYBOARD_ACTIONS.map((key) => (
+          <button class:list={['virtual-key', key.className]} type="button" data-play-key={key.key} aria-label={key.ariaLabel}>{key.label}</button>
+        ))}
       </div>
-    </template>
+    </div>
   </section>
 
   <section class="score" aria-label="Live score">
