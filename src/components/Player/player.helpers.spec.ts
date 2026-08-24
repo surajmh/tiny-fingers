@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CONSONANT_COLOR, NUMBER_EMOJIS, VOWEL_COLOR, getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, isMilestone } from './player.helpers.ts';
+import { CONSONANT_COLOR, NUMBER_EMOJIS, VOWEL_COLOR, getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, shouldShowVirtualKeyboard } from './player.helpers.ts';
 
 test('normalizes printable and special keys', () => {
   assert.equal(getGlyph('a'), 'A');
@@ -33,6 +33,18 @@ test('maps space, letters, and numbers to distinct canvas visuals', () => {
   assert.equal(getInputVisual('Z'), 'letter');
   assert.equal(getInputVisual('7'), 'number');
   assert.equal(getInputVisual('ArrowUp'), 'default');
+});
+
+test('reserves the keyboard area from the rendering canvas', () => {
+  assert.equal(getPlayAreaHeight(1200, 800), 800);
+  assert.equal(getPlayAreaHeight(1200, -20), 0);
+  assert.equal(getPlayAreaHeight(1200, 1600), 1200);
+});
+
+test('shows the virtual keyboard only in active tablet touch play', () => {
+  assert.equal(shouldShowVirtualKeyboard(false, true), false);
+  assert.equal(shouldShowVirtualKeyboard(true, false), false);
+  assert.equal(shouldShowVirtualKeyboard(true, true), true);
 });
 
 test('recognizes each 50-smash milestone', () => {

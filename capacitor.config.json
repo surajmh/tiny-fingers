@@ -1,0 +1,12 @@
+{
+  "appId": "dev.surajmh.tinyfingers",
+  "appName": "TinyFingers",
+  "webDir": "dist",
+  "backgroundColor": "#07101f",
+  "zoomEnabled": false,
+  "ios": {
+    "scrollEnabled": false,
+    "contentInset": "never",
+    "preferredContentMode": "recommended"
+  }
+}

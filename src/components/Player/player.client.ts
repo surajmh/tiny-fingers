@@ -1,5 +1,5 @@
 import { COLORS, MAX_GLYPHS, MAX_PARTICLES } from './player.constants';
-import { getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, isMilestone, type InputVisual } from './player.helpers';
+import { getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, shouldShowVirtualKeyboard, type InputVisual } from './player.helpers';
 
 interface Particle {
   x: number;
@@ -54,6 +54,7 @@ function requireElement<T extends Element>(selector: string): T {
 
 const player = requireElement<HTMLElement>('.player');
 const canvas = requireElement<HTMLCanvasElement>('#stage');
+const virtualKeyboard = requireElement<HTMLElement>('.virtual-keyboard');
 const context = canvas.getContext('2d', { alpha: true });
 if (!context) throw new Error('Canvas 2D is unavailable');
 
@@ -67,6 +68,7 @@ const bgAnimationToggle = requireElement<HTMLInputElement>('#bg-animation-toggle
 const soundToggle = requireElement<HTMLInputElement>('#sound-toggle');
 const letterSpeechModes = document.querySelectorAll<HTMLInputElement>('input[name="letter-speech-mode"]');
 const effectsToggle = requireElement<HTMLInputElement>('#effects-toggle');
+const tabletTouchDevice = matchMedia('(min-width: 600px) and (hover: none) and (pointer: coarse)');
 
 let width = 0;
 let height = 0;
@@ -133,22 +135,69 @@ refreshSpeechVoices();
 if ('speechSynthesis' in window) window.speechSynthesis.addEventListener('voiceschanged', refreshSpeechVoices);
 if (reducedEffects) player.classList.add('no-bg-animation');
 
+function initVirtualKeyboard(): void {
+  const template = document.getElementById('virtual-keyboard-template') as HTMLTemplateElement;
+  if (!template) return;
+  
+  const clone = template.content.cloneNode(true) as DocumentFragment;
+  virtualKeyboard.appendChild(clone);
+  
+  for (const button of virtualKeyboard.querySelectorAll<HTMLButtonElement>('[data-play-key]')) {
+    button.addEventListener('pointerdown', () => playVirtualKey(button));
+    button.addEventListener('click', (event) => {
+      if (event.detail === 0) playVirtualKey(button);
+    });
+  }
+}
+
+function updateVirtualKeyboardVisibility(): void {
+  const visible = shouldShowVirtualKeyboard(started, tabletTouchDevice.matches);
+  
+  if (visible && !virtualKeyboard.querySelector('.virtual-keyboard-rows')) {
+    initVirtualKeyboard();
+    // Force reflow so the transition happens from the initial state
+    virtualKeyboard.getBoundingClientRect();
+  }
+  
+  player.classList.toggle('show-virtual-keyboard', visible);
+  virtualKeyboard.setAttribute('aria-hidden', String(!visible));
+}
+
+let resizeTimer = 0;
+
 function resizeCanvas(): void {
   const ratio = Math.min(devicePixelRatio || 1, 1.5);
-  width = innerWidth;
-  height = innerHeight;
-  canvas.width = Math.round(width * ratio);
-  canvas.height = Math.round(height * ratio);
-  context?.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const newWidth = innerWidth;
+  const newHeight = player.classList.contains('show-virtual-keyboard')
+    ? getPlayAreaHeight(innerHeight, virtualKeyboard.getBoundingClientRect().top)
+    : innerHeight;
+
+  if (width === newWidth && height === newHeight) return;
+
+  width = newWidth;
+  height = newHeight;
+  player.style.setProperty('--play-area-height', `${height}px`);
+  
+  const targetCanvasWidth = Math.round(width * ratio);
+  const targetCanvasHeight = Math.round(height * ratio);
+  
+  if (canvas.width !== targetCanvasWidth || canvas.height !== targetCanvasHeight) {
+    canvas.width = targetCanvasWidth;
+    canvas.height = targetCanvasHeight;
+    context?.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
 }
 
 function scheduleResize(): void {
-  if (resizeFrame) return;
-  resizeFrame = requestAnimationFrame(() => {
-    resizeFrame = 0;
-    resizeCanvas();
-    if (particles.length || glyphs.length || circles.length || shapes.length) startRendering();
-  });
+  if (resizeTimer) window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => {
+    resizeTimer = 0;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      resizeCanvas();
+      if (particles.length || glyphs.length || circles.length || shapes.length) startRendering();
+    });
+  }, 150);
 }
 
 function randomColor(): string {
@@ -495,9 +544,23 @@ function begin(): void {
   started = true;
   welcome.hidden = true;
   player.classList.add('started');
+  updateVirtualKeyboardVisibility();
+  resizeCanvas();
   audioContext ??= soundToggle.checked ? new AudioContext() : null;
   resetScoreFade();
   requestLockdown();
+}
+
+function playVirtualKey(button: HTMLButtonElement): void {
+  const key = button.dataset.playKey;
+  if (!key || settings.open) return;
+
+  if (!started) begin();
+
+  const bounds = button.getBoundingClientRect();
+  const visual = getInputVisual(key);
+  pronounceLetter(key);
+  smash(getGlyph(key), bounds.left + bounds.width / 2, height * (0.24 + Math.random() * 0.5), visual);
 }
 
 function stopPlay(): void {
@@ -505,6 +568,8 @@ function stopPlay(): void {
   started = false;
   welcome.hidden = false;
   player.classList.remove('started');
+  updateVirtualKeyboardVisibility();
+  resizeCanvas();
   unlockKeyboard();
   if (document.fullscreenElement) {
     document.exitFullscreen?.().catch(() => undefined);
@@ -538,6 +603,10 @@ document.addEventListener('drop', (event) => event.preventDefault());
 startButton.addEventListener('click', begin);
 parentSetupButton.addEventListener('click', openSettings);
 window.addEventListener('resize', scheduleResize, { passive: true });
+tabletTouchDevice.addEventListener('change', () => {
+  updateVirtualKeyboardVisibility();
+  scheduleResize();
+});
 
 function canSmashTarget(target: EventTarget | null): boolean {
   return !(target instanceof Element && target.closest('button, a, dialog, .welcome'));
@@ -569,6 +638,7 @@ window.addEventListener('keydown', (event) => {
   }
 
   if (settings.open) return;
+  if (event.target instanceof Element && event.target.closest('[data-play-key]')) return;
 
   if (!started) {
     if (event.key === 'Enter') {
@@ -601,6 +671,7 @@ document.addEventListener('fullscreenchange', () => {
     if (started) stopPlay();
   }
 });
+
 
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')) {
   button.addEventListener('click', () => {
@@ -661,4 +732,5 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+updateVirtualKeyboardVisibility();
 resizeCanvas();

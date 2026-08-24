@@ -79,3 +79,11 @@ export function getChaosLabel(count: number): string {
   if (count < 150) return 'Maximum smash';
   return 'Legendary chaos';
 }
+
+export function getPlayAreaHeight(viewportHeight: number, keyboardTop: number): number {
+  return Math.max(0, Math.min(viewportHeight, keyboardTop));
+}
+
+export function shouldShowVirtualKeyboard(isPlaying: boolean, isTabletTouchDevice: boolean): boolean {
+  return isPlaying && isTabletTouchDevice;
+}

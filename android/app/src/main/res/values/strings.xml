@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TinyFingers</string>
+    <string name="title_activity_main">TinyFingers</string>
+    <string name="package_name">dev.surajmh.tinyfingers</string>
+    <string name="custom_url_scheme">dev.surajmh.tinyfingers</string>
+</resources>

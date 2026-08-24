@@ -26,6 +26,7 @@
     --muted: #c3d0e3;
     --accent: #65d8ff;
     --accent-2: #ffd84d;
+    --play-area-height: 100%;
     position: fixed;
     inset: 0;
     isolation: isolate;
@@ -217,10 +218,77 @@
     animation: none !important;
   }
 
-  #stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+  #stage { position: absolute; top: 0; right: 0; left: 0; width: 100%; height: var(--play-area-height); z-index: -1; }
+
+  .virtual-keyboard {
+    position: absolute;
+    right: max(0.65rem, env(safe-area-inset-right));
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    left: max(0.65rem, env(safe-area-inset-left));
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    pointer-events: none;
+  }
+  .player.show-virtual-keyboard .virtual-keyboard { pointer-events: auto; }
+  .virtual-keyboard-rows {
+    display: grid;
+    width: min(64rem, 100%);
+    gap: clamp(0.28rem, 0.8vw, 0.55rem);
+    padding: clamp(0.35rem, 1vw, 0.65rem);
+    background: rgb(5 14 31 / 0.42);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    border-radius: clamp(1rem, 2.8vw, 1.6rem);
+    box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.28);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(calc(100% + 1.25rem)) translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease-out;
+    will-change: transform, opacity;
+  }
+  .player.show-virtual-keyboard .virtual-keyboard-rows { opacity: 1; transform: translateY(0) translateZ(0); }
+  .virtual-keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: clamp(0.28rem, 0.8vw, 0.55rem);
+  }
+  .virtual-key {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: clamp(2.65rem, 7vh, 4.5rem);
+    max-width: 6rem;
+    padding: 0.2rem;
+    color: #07101f;
+    background: linear-gradient(145deg, var(--ink), var(--accent));
+    border: 0;
+    border-radius: clamp(0.65rem, 1.4vw, 1rem);
+    box-shadow: inset 0 -0.18rem 0 rgb(7 16 31 / 0.2), 0 0.25rem 0.5rem rgb(0 0 0 / 0.22);
+    font-size: clamp(1rem, 3vw, 2rem);
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 100ms ease, filter 100ms ease, box-shadow 100ms ease;
+  }
+  .virtual-key:nth-child(3n + 2) { background: linear-gradient(145deg, var(--accent-2), #fff2a8); }
+  .virtual-key:nth-child(3n) { background: linear-gradient(145deg, #ff9ab4, #ffd2df); }
+  .virtual-key:active {
+    transform: translateY(0.18rem) scale(0.96);
+    filter: brightness(0.92);
+    box-shadow: inset 0 0.08rem 0.3rem rgb(7 16 31 / 0.22);
+  }
+  .virtual-key:focus-visible { outline: 4px solid var(--accent-2); outline-offset: 3px; }
+  .virtual-keyboard-actions { width: min(70%, 30rem); margin: 0.05rem auto 0; }
+  .virtual-key.is-space, .virtual-key.is-action { max-width: none; font-size: clamp(0.82rem, 2.1vw, 1.3rem); letter-spacing: 0.08em; }
+  .virtual-key.is-space { flex: 1.6 1 0; }
+  .virtual-key.is-action { color: #081426; background: linear-gradient(145deg, var(--accent-2), var(--accent)); }
 
   .score {
     position: fixed;
+    z-index: 2;
     top: max(1rem, env(safe-area-inset-top));
     right: max(1rem, env(safe-area-inset-right));
     display: flex;
@@ -243,14 +311,16 @@
   .welcome {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     display: grid;
-    place-items: center;
+    align-content: center;
+    justify-items: center;
     padding: 1.5rem;
-    background: rgb(4 10 22 / 0.45);
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(4 10 22 / 0.5), rgb(4 10 22 / 0.24) 52%, transparent 74%);
   }
   .welcome[hidden] { display: none; }
-  .welcome-actions { display: grid; justify-items: center; gap: 1rem; }
+  .welcome-actions { display: grid; justify-items: center; gap: 1rem; pointer-events: auto; }
 
   .start-button {
     padding: clamp(1.25rem, 3.5vw, 2rem) clamp(2.5rem, 6vw, 4.5rem);
@@ -320,11 +390,18 @@
 }
 
 @media (max-width: 620px) {
-  .score { top: auto; right: 0.65rem; bottom: max(0.65rem, env(safe-area-inset-bottom)); }
+  .virtual-keyboard-actions { width: 100%; }
+  .score { top: 0.65rem; right: 0.65rem; bottom: auto; }
+}
+
+@media (orientation: landscape) and (max-height: 680px) {
+  .virtual-keyboard-rows { width: min(72rem, 96%); }
+  .virtual-key { min-height: clamp(2.25rem, 9vh, 3.5rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .start-button { animation: none; transition: none; }
   .parent-setup-button { transition: none; }
   .bg-glow, .bg-stars { animation: none !important; }
+  .virtual-keyboard-rows { transition: none; }
 }

@@ -9,12 +9,20 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "node --test src/components/Player/player.helpers.spec.ts",
-    "deploy": "astro build && wrangler deploy"
+    "deploy": "astro build && wrangler deploy",
+    "native:sync": "pnpm build && cap sync",
+    "ios:open": "cap open ios",
+    "android:open": "cap open android"
   },
   "dependencies": {
-    "astro": "7.1.6"
+    "@capacitor/core": "^8.5.0",
+    "astro": "7.2.4"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "wrangler": "^3.107.0"
   }
 }
