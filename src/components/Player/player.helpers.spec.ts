@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { NUMBER_EMOJIS, getChaosLabel, getGlyph } from './player.helpers.ts';
+import { CONSONANT_COLOR, NUMBER_EMOJIS, VOWEL_COLOR, getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, isMilestone } from './player.helpers.ts';
 
 test('normalizes printable and special keys', () => {
   assert.equal(getGlyph('a'), 'A');
@@ -8,6 +8,39 @@ test('normalizes printable and special keys', () => {
   assert.equal(getGlyph('Enter'), '↵');
   assert.equal(getGlyph('Shift'), '●');
   assert.ok(NUMBER_EMOJIS.includes(getGlyph('7') as any));
+});
+
+test('maps letters to simple phonics sounds', () => {
+  assert.equal(getPhonicsSound('a'), 'ah');
+  assert.equal(getPhonicsSound('K'), 'kuh');
+  assert.equal(getPhonicsSound('f'), 'fuh');
+  assert.equal(getPhonicsSound('x'), 'k-s');
+  assert.equal(getPhonicsSound('7'), null);
+});
+
+test('uses a distinct colour family for vowels and consonants', () => {
+  assert.equal(getLetterColor('a'), VOWEL_COLOR);
+  assert.equal(getLetterColor('E'), VOWEL_COLOR);
+  assert.equal(getLetterColor('b'), CONSONANT_COLOR);
+  assert.equal(getLetterColor('Z'), CONSONANT_COLOR);
+  assert.equal(getLetterColor('7'), null);
+});
+
+test('maps space, letters, and numbers to distinct canvas visuals', () => {
+  assert.equal(getInputVisual(' '), 'space');
+  assert.equal(getInputVisual('Spacebar'), 'space');
+  assert.equal(getInputVisual('a'), 'letter');
+  assert.equal(getInputVisual('Z'), 'letter');
+  assert.equal(getInputVisual('7'), 'number');
+  assert.equal(getInputVisual('ArrowUp'), 'default');
+});
+
+test('recognizes each 50-smash milestone', () => {
+  assert.equal(isMilestone(0), false);
+  assert.equal(isMilestone(49), false);
+  assert.equal(isMilestone(50), true);
+  assert.equal(isMilestone(100), true);
+  assert.equal(isMilestone(101), false);
 });
 
 test('labels each score band', () => {

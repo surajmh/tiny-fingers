@@ -2,7 +2,12 @@
 
 @layer reset {
   *, *::before, *::after { box-sizing: border-box; }
-  * { margin: 0; }
+  * {
+    margin: 0;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
   html, body { width: 100%; height: 100%; overflow: hidden; }
   button, input { font: inherit; }
 }
@@ -214,30 +219,6 @@
 
   #stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
 
-  .settings-button {
-    position: fixed;
-    z-index: 2;
-    top: max(1rem, env(safe-area-inset-top));
-    left: max(1rem, env(safe-area-inset-left));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: var(--muted);
-    background: var(--panel);
-    border: 1px solid rgb(255 255 255 / 0.16);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 160ms ease, color 160ms ease, border-color 160ms ease;
-  }
-  .settings-button:hover {
-    color: var(--ink);
-    background: var(--panel-strong);
-    border-color: var(--accent);
-    transform: rotate(25deg) scale(1.08);
-  }
-
   .score {
     position: fixed;
     top: max(1rem, env(safe-area-inset-top));
@@ -253,7 +234,10 @@
     font-size: clamp(0.72rem, 1.6vw, 0.9rem);
     font-weight: 800;
     text-transform: uppercase;
+    transition: opacity 500ms ease;
   }
+  .score.is-muted { opacity: 0.2; }
+  .score.is-restoring { opacity: 1; transition: none; }
   .score p:last-child { padding: 0.25rem 0.55rem; color: #18233a; background: var(--accent-2); border-radius: 999px; }
 
   .welcome {
@@ -266,6 +250,7 @@
     background: rgb(4 10 22 / 0.45);
   }
   .welcome[hidden] { display: none; }
+  .welcome-actions { display: grid; justify-items: center; gap: 1rem; }
 
   .start-button {
     padding: clamp(1.25rem, 3.5vw, 2rem) clamp(2.5rem, 6vw, 4.5rem);
@@ -288,6 +273,15 @@
   .start-button:active {
     transform: scale(0.96);
   }
+  .parent-setup-button {
+    padding: 0.55rem 0.85rem;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid rgb(255 255 255 / 0.22);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .parent-setup-button:hover { color: var(--ink); border-color: var(--accent); }
 
   @keyframes smashPulse {
     0%, 100% {
@@ -315,8 +309,11 @@
   .theme-list button[aria-pressed="true"], .sound-list button[aria-pressed="true"], .bg-motion-list button[aria-pressed="true"] { color: #081426; background: var(--accent); font-weight: 850; }
   .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
   .switch-row span { display: grid; }
-  .switch-row small { color: var(--muted); }
+  .switch-row small, .speech-mode small { color: var(--muted); }
   .switch-row input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent); }
+  .speech-mode-options { display: grid; gap: 0.5rem; }
+  .speech-mode-options label { display: flex; align-items: center; gap: 0.55rem; color: var(--ink); font-weight: 750; }
+  .speech-mode-options input { width: 1.15rem; height: 1.15rem; accent-color: var(--accent); }
   .settings-actions { display: flex; justify-content: space-between; gap: 1rem; }
   .settings-actions .done-button { color: #081426; background: var(--accent); }
   noscript { position: fixed; inset: auto 1rem 1rem; padding: 1rem; color: #081426; background: var(--accent-2); }
@@ -328,6 +325,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .start-button { animation: none; transition: none; }
-  .settings-button { transition: none; }
+  .parent-setup-button { transition: none; }
   .bg-glow, .bg-stars { animation: none !important; }
 }

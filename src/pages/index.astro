@@ -9,7 +9,20 @@ import { Player } from '../components/Player';
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="A fast fullscreen keyboard, touch, and mouse toy for babies and toddlers." />
     <meta name="theme-color" content="#07101f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TinyFingers" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <title>TinyFingers | Fullscreen keyboard smash toy</title>
   </head>
-  <body><Player /></body>
+  <body>
+    <Player />
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
+      }
+    </script>
+  </body>
 </html>

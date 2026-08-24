@@ -1,0 +1,26 @@
+{
+  "name": "TinyFingers",
+  "short_name": "TinyFingers",
+  "description": "A fullscreen keyboard, touch, and mouse toy for babies and toddlers.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07101f",
+  "theme_color": "#07101f",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/tinyfingers-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/tinyfingers-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
