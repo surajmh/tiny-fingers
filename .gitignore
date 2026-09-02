@@ -5,3 +5,4 @@ dist/
 .wrangler/
 Debug/
 .DS_Store
+android/.idea
