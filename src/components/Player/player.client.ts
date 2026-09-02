@@ -1,5 +1,5 @@
 import { COLORS, MAX_GLYPHS, MAX_PARTICLES } from './player.constants';
-import { getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, parseSettings, shouldShowVirtualKeyboard, type InputVisual, type LetterSpeechMode } from './player.helpers';
+import { getChaosLabel, getGlyph, getInputVisual, getLetterColor, getLetterEmoji, getSpokenText, getPlayAreaHeight, isMilestone, parseSettings, shouldShowVirtualKeyboard, type InputVisual, type LetterSpeechMode } from './player.helpers';
 
 interface Particle {
   x: number;
@@ -87,9 +87,10 @@ const ESCAPE_HOLD_MS = 3_000;
 let escapeHoldTimer = 0;
 let scoreFadeTimer = 0;
 const SCORE_FADE_MS = 3_000;
-const LETTER_SPEECH_COOLDOWN_MS = 1_300;
-let lastSpokenLetter = '';
-let lastLetterSpeechAt = 0;
+const KEY_REPEAT_MS = 1_300;
+let lastVoicedKey = '';
+let lastVoicedAt = 0;
+let keyRepeats = 0;
 let speechVoices: SpeechSynthesisVoice[] = [];
 
 type KeyboardController = {
@@ -475,18 +476,16 @@ function getLetterSpeechMode(): LetterSpeechMode {
   return selected === 'names' || selected === 'phonics' ? selected : 'off';
 }
 
-function pronounceLetter(key: string): void {
-  const mode = getLetterSpeechMode();
-  if (mode === 'off' || getInputVisual(key) !== 'letter') return;
+function pronounce(key: string): void {
   if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') return;
 
-  const letter = key.toUpperCase();
-  const now = performance.now();
-  if (window.speechSynthesis.speaking || (letter === lastSpokenLetter && now - lastLetterSpeechAt < LETTER_SPEECH_COOLDOWN_MS)) return;
+  const spokenText = getSpokenText(key, getLetterSpeechMode());
+  if (!spokenText) return;
 
-  lastSpokenLetter = letter;
-  lastLetterSpeechAt = now;
-  const spokenText = mode === 'phonics' ? getPhonicsSound(letter) ?? letter.toLowerCase() : letter.toLowerCase();
+  // Whether this press gets a turn is decided by glyphForPress; here we only avoid
+  // talking over an utterance already in flight when different keys are mashed.
+  if (window.speechSynthesis.speaking) return;
+
   const utterance = new SpeechSynthesisUtterance(spokenText);
   const preferredVoice = getPreferredSpeechVoice();
   if (preferredVoice) utterance.voice = preferredVoice;
@@ -495,6 +494,32 @@ function pronounceLetter(key: string): void {
   utterance.pitch = 1.04;
   utterance.volume = 0.72;
   window.speechSynthesis.speak(utterance);
+}
+
+/**
+ * A fresh press of a letter or number shows the character and speaks it. Pressing that
+ * same key again inside the window is silent, and for letters shows one of their own
+ * pictures instead, cycling through them, so holding A gives apple, aeroplane, ant.
+ * Numbers have no pictures, so a repeat just shows the digit again. Once the window
+ * lapses the key gets another spoken turn and renders as the character again.
+ */
+function glyphForPress(key: string, allowSpeech: boolean): string {
+  const visual = getInputVisual(key);
+  if (visual !== 'letter' && visual !== 'number') return getGlyph(key);
+
+  const token = key.toUpperCase();
+  const now = performance.now();
+
+  if (token === lastVoicedKey && now - lastVoicedAt < KEY_REPEAT_MS) {
+    keyRepeats += 1;
+    return getLetterEmoji(token, keyRepeats - 1) ?? getGlyph(key);
+  }
+
+  lastVoicedKey = token;
+  lastVoicedAt = now;
+  keyRepeats = 0;
+  if (allowSpeech) pronounce(key);
+  return getGlyph(key);
 }
 
 function resetScoreFade(): void {
@@ -545,8 +570,7 @@ function playVirtualKey(button: HTMLButtonElement): void {
 
   const bounds = button.getBoundingClientRect();
   const visual = getInputVisual(key);
-  pronounceLetter(key);
-  smash(getGlyph(key), bounds.left + bounds.width / 2, height * (0.24 + Math.random() * 0.5), visual);
+  smash(glyphForPress(key, true), bounds.left + bounds.width / 2, height * (0.24 + Math.random() * 0.5), visual);
 }
 
 function stopPlay(): void {
@@ -640,8 +664,7 @@ window.addEventListener('keydown', (event) => {
 
   event.preventDefault();
   const visual = getInputVisual(event.key);
-  if (!event.repeat) pronounceLetter(event.key);
-  smash(getGlyph(event.key), undefined, undefined, visual);
+  smash(glyphForPress(event.key, !event.repeat), undefined, undefined, visual);
 }, { capture: true });
 
 window.addEventListener('keyup', (event) => {
@@ -710,8 +733,9 @@ bgAnimationToggle.addEventListener('change', () => {
 for (const modeControl of letterSpeechModes) {
   modeControl.addEventListener('change', () => {
     if (!modeControl.checked) return;
-    lastSpokenLetter = '';
-    lastLetterSpeechAt = 0;
+    lastVoicedKey = '';
+    lastVoicedAt = 0;
+    keyRepeats = 0;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   });
 }

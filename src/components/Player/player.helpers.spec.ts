@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CONSONANT_COLOR, NUMBER_EMOJIS, VOWEL_COLOR, getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, parseSettings, shouldShowVirtualKeyboard } from './player.helpers.ts';
+import { CONSONANT_COLOR, VOWEL_COLOR, getChaosLabel, getGlyph, getLetterEmoji, getInputVisual, getLetterColor, getNumberName, getPhonicsSound, getSpokenText, getPlayAreaHeight, isMilestone, parseSettings, shouldShowVirtualKeyboard } from './player.helpers.ts';
 
 test('normalizes printable and special keys', () => {
   assert.equal(getGlyph('a'), 'A');
   assert.equal(getGlyph(' '), '★');
   assert.equal(getGlyph('Enter'), '↵');
   assert.equal(getGlyph('Shift'), '●');
-  assert.ok(NUMBER_EMOJIS.includes(getGlyph('7') as any));
+  assert.equal(getGlyph('7'), '7');
+  assert.equal(getGlyph('0'), '0');
 });
 
 test('maps letters to simple phonics sounds', () => {
@@ -97,4 +98,42 @@ test('keeps only stored settings of the expected shape', () => {
     somethingElse: 'ignored',
     bgMotion: 'aurora',
   })), { bgMotion: 'aurora' });
+});
+
+test('cycles a letter through its own pictures on repeat presses', () => {
+  const a = [getLetterEmoji('a', 0), getLetterEmoji('a', 1), getLetterEmoji('a', 2)];
+  assert.equal(new Set(a).size, 3, 'consecutive repeats should not show the same picture');
+  assert.equal(getLetterEmoji('a', 3), getLetterEmoji('a', 0), 'wraps around');
+  assert.equal(getLetterEmoji('A', 1), getLetterEmoji('a', 1), 'case-insensitive');
+});
+
+test('only letters have pictures', () => {
+  for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
+    assert.ok(getLetterEmoji(letter, 0), `missing pictures for ${letter}`);
+  }
+  assert.equal(getLetterEmoji('7', 0), null);
+  assert.equal(getLetterEmoji(' ', 0), null);
+  assert.equal(getLetterEmoji('Enter', 0), null);
+});
+
+test('names each digit', () => {
+  assert.equal(getNumberName('0'), 'zero');
+  assert.equal(getNumberName('7'), 'seven');
+  assert.equal(getNumberName('9'), 'nine');
+  assert.equal(getNumberName('a'), null);
+  assert.equal(getNumberName('Enter'), null);
+});
+
+test('resolves what the voice says for letters and numbers', () => {
+  assert.equal(getSpokenText('a', 'names'), 'a');
+  assert.equal(getSpokenText('A', 'names'), 'a');
+  assert.equal(getSpokenText('a', 'phonics'), 'ah');
+  // digits have no phonic sound, so they are named in either voice mode
+  assert.equal(getSpokenText('3', 'names'), 'three');
+  assert.equal(getSpokenText('3', 'phonics'), 'three');
+  // nothing else speaks, and Off silences everything
+  assert.equal(getSpokenText(' ', 'names'), null);
+  assert.equal(getSpokenText('Enter', 'names'), null);
+  assert.equal(getSpokenText('a', 'off'), null);
+  assert.equal(getSpokenText('3', 'off'), null);
 });
