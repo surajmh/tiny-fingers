@@ -1,0 +1,256 @@
+---
+const lastUpdated = 'September 3, 2026';
+const appName = 'TinyFingers';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Terms and conditions for using TinyFingers, a fullscreen keyboard smash toy for babies and toddlers." />
+    <meta name="theme-color" content="#07101f" />
+    <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <title>Terms &amp; Conditions | TinyFingers</title>
+    <style is:global>
+      :root {
+        --background: #07101f;
+        --panel: #101d31;
+        --panel-strong: #1c3451;
+        --ink: #f6f9ff;
+        --muted: #c3d0e3;
+        --accent: #65d8ff;
+        --accent-2: #ffd84d;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        color-scheme: dark;
+        font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", system-ui, sans-serif;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(ellipse at 25% 10%, rgb(101 216 255 / 0.14) 0%, transparent 55%),
+          radial-gradient(ellipse at 85% 20%, rgb(159 122 234 / 0.12) 0%, transparent 55%),
+          radial-gradient(ellipse at 55% 95%, rgb(255 216 77 / 0.1) 0%, transparent 55%),
+          var(--background);
+        background-attachment: fixed;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--accent);
+        -webkit-tap-highlight-color: transparent;
+      }
+      a:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+        border-radius: 6px;
+      }
+
+      .page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: clamp(1.25rem, 5vw, 3rem) 1rem 4rem;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        padding: 0.55rem 1.1rem;
+        color: var(--ink);
+        background: var(--panel);
+        border: 1px solid rgb(255 255 255 / 0.16);
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 750;
+        text-decoration: none;
+        transition: background 150ms ease, transform 150ms ease;
+      }
+      .back-link:hover {
+        background: var(--panel-strong);
+        transform: translateY(-1px);
+      }
+      .back-link::before {
+        content: "‹";
+        font-size: 1.2rem;
+        line-height: 1;
+        color: var(--accent);
+      }
+
+      .panel {
+        padding: clamp(1.5rem, 5vw, 2.75rem);
+        background: var(--panel);
+        border: 1px solid rgb(255 255 255 / 0.12);
+        border-radius: 20px;
+        box-shadow: 0 1.5rem 3.5rem rgb(0 0 0 / 0.35);
+      }
+
+      .kicker {
+        margin: 0 0 0.5rem;
+        color: var(--accent);
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(2rem, 6vw, 2.75rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .last-updated {
+        margin: 0 0 1.75rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      h2 {
+        margin: 2.25rem 0 0.6rem;
+        font-size: clamp(1.15rem, 3.5vw, 1.35rem);
+        font-weight: 850;
+        letter-spacing: -0.01em;
+      }
+      h2:first-of-type {
+        margin-top: 0;
+      }
+      p {
+        margin: 0 0 1rem;
+        color: var(--muted);
+      }
+      p strong {
+        color: var(--ink);
+      }
+      ul,
+      ol {
+        margin: 0 0 1rem;
+        padding-left: 1.4rem;
+        color: var(--muted);
+      }
+      li {
+        margin-bottom: 0.4rem;
+      }
+      li::marker {
+        color: var(--accent);
+        font-weight: 800;
+      }
+
+      .footer-note {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgb(255 255 255 / 0.09);
+        font-size: 0.85rem;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .back-link {
+          transition: none;
+        }
+        .back-link:hover {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="back-link" href="/">Back to {appName}</a>
+
+      <article class="panel">
+        <p class="kicker">Terms &amp; Conditions</p>
+        <h1>Terms of Use</h1>
+        <p class="last-updated">Last updated: <time datetime="2026-09-03">{lastUpdated}</time></p>
+
+        <h2>1. Acceptance of these terms</h2>
+        <p>
+          By downloading, accessing, or using {appName} ("the app"), you agree to be bound by
+          these Terms and Conditions. If you do not agree to any part of these terms, please do
+          not use the app. If you are a parent or guardian, you agree to these terms on behalf of
+          yourself and the child using the app.
+        </p>
+
+        <h2>2. Description of the service</h2>
+        <p>
+          {appName} is a fullscreen keyboard, touch, and mouse toy designed for babies and
+          toddlers. The app plays sounds and visuals in response to keys, taps, and clicks. The
+          app is intended for entertainment only and is not a learning, educational, or medical
+          product.
+        </p>
+
+        <h2>3. Use by children</h2>
+        <p>
+          {appName} is designed for use by young children under the supervision of a parent,
+          guardian, or responsible adult. By allowing a child to use the app, you acknowledge
+          that you are responsible for their use of the app and for their safety while doing so.
+        </p>
+
+        <h2>4. No data collection</h2>
+        <p>
+          The app runs locally on your device. It does not collect, store, or transmit any
+          personal information, and it does not include analytics, advertising, or third-party
+          tracking. Nothing you or your child does in the app is sent to us or anyone else.
+        </p>
+
+        <h2>5. Intellectual property</h2>
+        <p>
+          All content in the app — including the software, design, graphics, sounds, and the
+          {appName} name — is owned by or licensed to us and is protected by copyright and other
+          intellectual property laws. You may not copy, modify, distribute, sell, or reverse
+          engineer any part of the app, except as permitted by law.
+        </p>
+
+        <h2>6. Acceptable use</h2>
+        <p>You agree not to:</p>
+        <ul>
+          <li>Use the app in any way that violates applicable law or regulation;</li>
+          <li>Attempt to disrupt, damage, or interfere with the app or its underlying systems;</li>
+          <li>Copy or redistribute the app or its content for commercial purposes.</li>
+        </ul>
+
+        <h2>7. Disclaimer of warranties</h2>
+        <p>
+          The app is provided "as is" and "as available", without warranties of any kind, whether
+          express or implied, including implied warranties of merchantability, fitness for a
+          particular purpose, and non-infringement. We do not warrant that the app will be
+          uninterrupted, error-free, or free of harmful components.
+        </p>
+
+        <h2>8. Limitation of liability</h2>
+        <p>
+          To the maximum extent permitted by law, we shall not be liable for any indirect,
+          incidental, special, consequential, or punitive damages, or any loss of data, arising
+          out of or in connection with your use of the app, even if we have been advised of the
+          possibility of such damages.
+        </p>
+
+        <h2>9. Changes to these terms</h2>
+        <p>
+          We may update these Terms and Conditions from time to time. The latest version will
+          always be available on this page, and the "Last updated" date above will reflect the
+          most recent change. Your continued use of the app after changes take effect means you
+          accept the revised terms.
+        </p>
+
+        <h2>10. Contact</h2>
+        <p>
+          If you have any questions about these Terms and Conditions, please
+          <a href="mailto:hello@surajmh.dev">contact us</a>.
+        </p>
+
+        <p class="footer-note">
+          These terms were written for {appName}, a toy for little hands and big smiles.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
