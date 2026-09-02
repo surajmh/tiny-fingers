@@ -26,6 +26,11 @@
     --muted: #c3d0e3;
     --accent: #65d8ff;
     --accent-2: #ffd84d;
+    /* Background decoration hues, kept separate from the UI accents so the five worlds
+       can differ without dragging button and chrome colours along with them. */
+    --bg-1: 101 216 255;
+    --bg-2: 159 122 234;
+    --bg-3: 255 216 77;
     --play-area-height: 100%;
     position: fixed;
     inset: 0;
@@ -36,10 +41,10 @@
     touch-action: none;
     user-select: none;
   }
-  .player[data-theme="candy"] { --background: #35102f; --panel: #5b194a; --panel-strong: #7b2765; --accent: #ff91c8; --accent-2: #8ff0ff; }
-  .player[data-theme="ocean"] { --background: #03263a; --panel: #064665; --panel-strong: #08678b; --accent: #72e6d1; --accent-2: #ffdd78; }
-  .player[data-theme="jungle"] { --background: #09281e; --panel: #154936; --panel-strong: #23664a; --accent: #88ee81; --accent-2: #ffd65c; }
-  .player[data-theme="sunset"] { --background: #2f1535; --panel: #5b2748; --panel-strong: #81384b; --accent: #ff9b61; --accent-2: #ffe070; }
+  .player[data-theme="candy"] { --background: #35102f; --panel: #5b194a; --panel-strong: #7b2765; --accent: #ff91c8; --accent-2: #8ff0ff; --bg-1: 255 145 200; --bg-2: 199 139 255; --bg-3: 143 240 255; }
+  .player[data-theme="ocean"] { --background: #03263a; --panel: #064665; --panel-strong: #08678b; --accent: #72e6d1; --accent-2: #ffdd78; --bg-1: 114 230 209; --bg-2: 101 176 255; --bg-3: 255 221 120; }
+  .player[data-theme="jungle"] { --background: #09281e; --panel: #154936; --panel-strong: #23664a; --accent: #88ee81; --accent-2: #ffd65c; --bg-1: 136 238 129; --bg-2: 95 214 196; --bg-3: 255 214 92; }
+  .player[data-theme="sunset"] { --background: #2f1535; --panel: #5b2748; --panel-strong: #81384b; --accent: #ff9b61; --accent-2: #ffe070; --bg-1: 255 155 97; --bg-2: 255 111 145; --bg-3: 255 224 112; }
 
   /* Zero-lag GPU hardware-accelerated animated backgrounds */
   .bg-fx {
@@ -50,14 +55,22 @@
     pointer-events: none;
     contain: strict;
   }
+  /* Each layer is sized to its own animation, not a blanket 4x viewport.
+     .bg-glow spins a full turn, so it needs a square covering the viewport diagonal.
+     .bg-stars only drifts, skews and scales, so viewport + largest excursion covers it. */
   .bg-glow, .bg-stars {
     position: absolute;
-    inset: -50%;
-    width: 200%;
-    height: 200%;
     pointer-events: none;
     will-change: transform;
   }
+  .bg-glow {
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 150vmax;
+    margin: -75vmax 0 0 -75vmax;
+  }
+  .bg-stars { inset: calc(-6% - 60px); }
 
   /* ----------------------------------------------------
      1. GALAXY (Deep cosmic spiral with drifting stars)
@@ -65,10 +78,10 @@
   .player[data-bg-motion="galaxy"] .bg-glow,
   .player:not([data-bg-motion]) .bg-glow {
     background:
-      radial-gradient(ellipse at 35% 35%, rgb(101 216 255 / 0.35) 0%, transparent 45%),
-      radial-gradient(ellipse at 65% 65%, rgb(159 122 234 / 0.4) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgb(255 111 145 / 0.28) 0%, transparent 40%),
-      radial-gradient(circle at 75% 25%, rgb(98 230 167 / 0.25) 0%, transparent 35%);
+      radial-gradient(ellipse at 35% 35%, rgb(var(--bg-1) / 0.35) 0%, transparent 45%),
+      radial-gradient(ellipse at 65% 65%, rgb(var(--bg-2) / 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgb(var(--bg-2) / 0.28) 0%, transparent 40%),
+      radial-gradient(circle at 75% 25%, rgb(var(--bg-3) / 0.25) 0%, transparent 35%);
     filter: blur(40px);
     animation: galaxySpin 24s linear infinite;
   }
@@ -77,10 +90,10 @@
     background-image:
       radial-gradient(circle at 15% 20%, #ffffff 0 1.5px, transparent 3px),
       radial-gradient(circle at 75% 15%, #ffffff 0 2px, transparent 4px),
-      radial-gradient(circle at 40% 70%, #65d8ff 0 1.5px, transparent 3px),
-      radial-gradient(circle at 85% 80%, #ffd84d 0 2px, transparent 4px),
+      radial-gradient(circle at 40% 70%, rgb(var(--bg-1)) 0 1.5px, transparent 3px),
+      radial-gradient(circle at 85% 80%, rgb(var(--bg-3)) 0 2px, transparent 4px),
       radial-gradient(circle at 25% 85%, #ffffff 0 1.5px, transparent 3px),
-      radial-gradient(circle at 60% 40%, #ff6f91 0 1.8px, transparent 3.5px);
+      radial-gradient(circle at 60% 40%, rgb(var(--bg-2)) 0 1.8px, transparent 3.5px);
     background-size: 220px 220px, 320px 320px, 260px 260px, 380px 380px, 170px 170px, 290px 290px;
     animation: galaxyFloat 12s ease-in-out infinite alternate;
   }
@@ -90,18 +103,18 @@
      ---------------------------------------------------- */
   .player[data-bg-motion="bubbles"] .bg-glow {
     background:
-      radial-gradient(circle at 30% 60%, rgb(114 230 209 / 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 70% 30%, rgb(255 145 200 / 0.32) 0%, transparent 55%),
-      radial-gradient(circle at 50% 80%, rgb(101 216 255 / 0.25) 0%, transparent 45%);
+      radial-gradient(circle at 30% 60%, rgb(var(--bg-1) / 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 70% 30%, rgb(var(--bg-2) / 0.32) 0%, transparent 55%),
+      radial-gradient(circle at 50% 80%, rgb(var(--bg-1) / 0.25) 0%, transparent 45%);
     filter: blur(35px);
     animation: bubbleGlow 8s ease-in-out infinite alternate;
   }
   .player[data-bg-motion="bubbles"] .bg-stars {
     background-image:
       radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.8) 0 4px, transparent 5px, rgb(255 255 255 / 0.4) 12px, transparent 15px),
-      radial-gradient(circle at 50% 50%, rgb(101 216 255 / 0.8) 0 6px, transparent 7px, rgb(101 216 255 / 0.35) 20px, transparent 24px),
-      radial-gradient(circle at 50% 50%, rgb(255 145 200 / 0.85) 0 8px, transparent 9px, rgb(255 145 200 / 0.4) 28px, transparent 32px),
-      radial-gradient(circle at 50% 50%, rgb(255 216 77 / 0.75) 0 5px, transparent 6px, rgb(255 216 77 / 0.3) 16px, transparent 19px);
+      radial-gradient(circle at 50% 50%, rgb(var(--bg-1) / 0.8) 0 6px, transparent 7px, rgb(var(--bg-1) / 0.35) 20px, transparent 24px),
+      radial-gradient(circle at 50% 50%, rgb(var(--bg-2) / 0.85) 0 8px, transparent 9px, rgb(var(--bg-2) / 0.4) 28px, transparent 32px),
+      radial-gradient(circle at 50% 50%, rgb(var(--bg-3) / 0.75) 0 5px, transparent 6px, rgb(var(--bg-3) / 0.3) 16px, transparent 19px);
     background-size: 180px 240px, 280px 360px, 340px 420px, 220px 300px;
     background-position: 10% 20%, 65% 40%, 35% 80%, 80% 90%;
     animation: bubbleFloat 9s ease-in-out infinite alternate;
@@ -112,16 +125,16 @@
      ---------------------------------------------------- */
   .player[data-bg-motion="aurora"] .bg-glow {
     background:
-      linear-gradient(135deg, transparent 20%, rgb(98 230 167 / 0.4) 40%, rgb(101 216 255 / 0.45) 55%, rgb(159 122 234 / 0.4) 70%, transparent 85%),
-      radial-gradient(ellipse at 50% 30%, rgb(114 230 209 / 0.35) 0%, transparent 60%);
+      linear-gradient(135deg, transparent 20%, rgb(var(--bg-3) / 0.4) 40%, rgb(var(--bg-1) / 0.45) 55%, rgb(var(--bg-2) / 0.4) 70%, transparent 85%),
+      radial-gradient(ellipse at 50% 30%, rgb(var(--bg-1) / 0.35) 0%, transparent 60%);
     filter: blur(35px);
     animation: auroraWave 9s ease-in-out infinite alternate;
   }
   .player[data-bg-motion="aurora"] .bg-stars {
     background-image:
-      repeating-linear-gradient(90deg, transparent 0 40px, rgb(255 255 255 / 0.08) 40px 70px, transparent 70px 140px, rgb(101 216 255 / 0.12) 140px 190px, transparent 190px 260px),
+      repeating-linear-gradient(90deg, transparent 0 40px, rgb(255 255 255 / 0.08) 40px 70px, transparent 70px 140px, rgb(var(--bg-1) / 0.12) 140px 190px, transparent 190px 260px),
       radial-gradient(circle at 30% 40%, #ffffff 0 2px, transparent 4px),
-      radial-gradient(circle at 70% 60%, #65d8ff 0 2.5px, transparent 5px);
+      radial-gradient(circle at 70% 60%, rgb(var(--bg-1)) 0 2.5px, transparent 5px);
     background-size: 100% 100%, 250px 250px, 320px 320px;
     animation: auroraCurtain 7s ease-in-out infinite alternate;
   }
@@ -131,18 +144,18 @@
      ---------------------------------------------------- */
   .player[data-bg-motion="stars"] .bg-glow {
     background:
-      radial-gradient(circle at 50% 50%, rgb(101 216 255 / 0.5) 0%, rgb(159 122 234 / 0.3) 30%, transparent 65%);
+      radial-gradient(circle at 50% 50%, rgb(var(--bg-1) / 0.5) 0%, rgb(var(--bg-2) / 0.3) 30%, transparent 65%);
     filter: blur(30px);
     animation: starCorePulse 5s ease-in-out infinite alternate;
   }
   .player[data-bg-motion="stars"] .bg-stars {
     background-image:
       radial-gradient(circle at 10% 10%, #ffffff 0 2px, transparent 3px),
-      radial-gradient(circle at 30% 45%, #ffd84d 0 2.5px, transparent 4px),
-      radial-gradient(circle at 60% 20%, #65d8ff 0 2px, transparent 3.5px),
+      radial-gradient(circle at 30% 45%, rgb(var(--bg-3)) 0 2.5px, transparent 4px),
+      radial-gradient(circle at 60% 20%, rgb(var(--bg-1)) 0 2px, transparent 3.5px),
       radial-gradient(circle at 80% 75%, #ffffff 0 3px, transparent 5px),
-      radial-gradient(circle at 45% 85%, #ff6f91 0 2px, transparent 3.5px),
-      radial-gradient(circle at 90% 30%, #62e6a7 0 2.5px, transparent 4px),
+      radial-gradient(circle at 45% 85%, rgb(var(--bg-2)) 0 2px, transparent 3.5px),
+      radial-gradient(circle at 90% 30%, rgb(var(--bg-3)) 0 2.5px, transparent 4px),
       radial-gradient(circle at 20% 80%, #ffffff 0 1.5px, transparent 3px);
     background-size: 130px 130px, 190px 190px, 160px 160px, 240px 240px, 150px 150px, 210px 210px, 110px 110px;
     animation: starDriftSmooth 10s ease-in-out infinite alternate;
@@ -153,19 +166,19 @@
      ---------------------------------------------------- */
   .player[data-bg-motion="embers"] .bg-glow {
     background:
-      radial-gradient(ellipse at 50% 85%, rgb(255 111 67 / 0.5) 0%, rgb(255 193 7 / 0.3) 35%, transparent 65%),
-      radial-gradient(circle at 30% 70%, rgb(244 67 54 / 0.3) 0%, transparent 45%),
-      radial-gradient(circle at 70% 70%, rgb(255 152 0 / 0.35) 0%, transparent 50%);
+      radial-gradient(ellipse at 50% 85%, rgb(var(--bg-1) / 0.5) 0%, rgb(var(--bg-3) / 0.3) 35%, transparent 65%),
+      radial-gradient(circle at 30% 70%, rgb(var(--bg-2) / 0.3) 0%, transparent 45%),
+      radial-gradient(circle at 70% 70%, rgb(var(--bg-3) / 0.35) 0%, transparent 50%);
     filter: blur(35px);
     animation: fireGlow 6s ease-in-out infinite alternate;
   }
   .player[data-bg-motion="embers"] .bg-stars {
     background-image:
-      radial-gradient(circle at 20% 80%, #ffd84d 0 3px, transparent 6px),
-      radial-gradient(circle at 70% 90%, #ff7043 0 4px, transparent 7px),
-      radial-gradient(circle at 40% 75%, #ffca28 0 3.5px, transparent 6px),
-      radial-gradient(circle at 85% 65%, #ffab40 0 2.5px, transparent 5px),
-      radial-gradient(circle at 15% 50%, #ffe082 0 3px, transparent 5px);
+      radial-gradient(circle at 20% 80%, rgb(var(--bg-3)) 0 3px, transparent 6px),
+      radial-gradient(circle at 70% 90%, rgb(var(--bg-1)) 0 4px, transparent 7px),
+      radial-gradient(circle at 40% 75%, rgb(var(--bg-3)) 0 3.5px, transparent 6px),
+      radial-gradient(circle at 85% 65%, rgb(var(--bg-2)) 0 2.5px, transparent 5px),
+      radial-gradient(circle at 15% 50%, rgb(var(--bg-3)) 0 3px, transparent 5px);
     background-size: 160px 260px, 240px 340px, 200px 300px, 280px 380px, 140px 220px;
     animation: embersFloat 8s ease-in-out infinite alternate;
   }
@@ -218,6 +231,21 @@
     animation: none !important;
   }
 
+  /* Nothing worth compositing before play starts. Paused rather than none, so the
+     motion resumes mid-cycle instead of snapping back to 0%.
+     Delete this rule if you'd rather the welcome screen kept drifting. */
+  .player:not(.started) .bg-glow,
+  .player:not(.started) .bg-stars {
+    animation-play-state: paused;
+  }
+
+  /* Same again behind the settings panel, whose backdrop is 82% opaque. Kept as its
+     own rule: where :has() is unsupported this one is dropped and the other survives. */
+  .player:has(.settings[open]) .bg-glow,
+  .player:has(.settings[open]) .bg-stars {
+    animation-play-state: paused;
+  }
+
   #stage { position: absolute; top: 0; right: 0; left: 0; width: 100%; height: var(--play-area-height); z-index: -1; }
 
   .virtual-keyboard {
@@ -236,12 +264,13 @@
     width: min(64rem, 100%);
     gap: clamp(0.28rem, 0.8vw, 0.55rem);
     padding: clamp(0.35rem, 1vw, 0.65rem);
-    background: rgb(5 14 31 / 0.42);
+    /* No backdrop-filter: the backdrop here animates, so the blur could never be
+       cached and was recomputed every frame under the one surface toddlers hammer.
+       A more opaque panel reads near-identically and costs nothing per frame. */
+    background: rgb(5 14 31 / 0.72);
     border: 1px solid rgb(255 255 255 / 0.16);
     border-radius: clamp(1rem, 2.8vw, 1.6rem);
     box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.28);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     opacity: 0;
     transform: translateY(calc(100% + 1.25rem)) translateZ(0);
     -webkit-backface-visibility: hidden;
@@ -286,6 +315,54 @@
   .virtual-key.is-space { flex: 1.6 1 0; }
   .virtual-key.is-action { color: #081426; background: linear-gradient(145deg, var(--accent-2), var(--accent)); }
 
+  /* The only route back to parent controls on a tablet: hold for ESCAPE_HOLD_MS.
+     Same gate as the physical Escape key, faint enough to ignore during play. */
+  .parent-hold {
+    position: fixed;
+    z-index: 2;
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid rgb(255 255 255 / 0.16);
+    border-radius: 999px;
+    font-size: 1.2rem;
+    line-height: 1;
+    opacity: 0.28;
+    cursor: pointer;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    transition: opacity 150ms ease, box-shadow 150ms ease;
+  }
+  .parent-hold:hover, .parent-hold:focus-visible { opacity: 1; }
+  /* The ring fills over the hold so the gesture shows its own progress.
+     6rem of spread also fills the wider welcome-screen pill. */
+  .parent-hold:active {
+    opacity: 1;
+    box-shadow: inset 0 0 0 6rem var(--accent);
+    transition: box-shadow 3s linear, opacity 150ms ease;
+  }
+  .parent-hold-label { display: none; }
+
+  /* On the welcome screen it replaces the old one-tap "Parent setup" button that sat
+     under Start, so it needs to read as a labelled control, not a mystery glyph.
+     It shrinks to a bare corner glyph once play starts. */
+  .player:not(.started) .parent-hold {
+    grid-auto-flow: column;
+    gap: 0.5rem;
+    width: auto;
+    height: auto;
+    min-height: 2.75rem;
+    padding: 0.55rem 1.1rem;
+    opacity: 0.8;
+  }
+  .player:not(.started) .parent-hold-label { display: inline; font-size: 0.95rem; font-weight: 750; }
+
   .score {
     position: fixed;
     z-index: 2;
@@ -321,6 +398,22 @@
   }
   .welcome[hidden] { display: none; }
   .welcome-actions { display: grid; justify-items: center; gap: 1rem; pointer-events: auto; }
+  /* First run showed a starfield and a button, and nothing saying what either was for. */
+  .welcome-title {
+    font-size: clamp(2.25rem, 7vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-shadow: 0 0.25rem 1.5rem rgb(4 10 22 / 0.6);
+  }
+  .welcome-hint {
+    margin-top: -0.4rem;
+    color: var(--muted);
+    font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+    font-weight: 600;
+    text-align: center;
+    text-wrap: balance;
+  }
 
   .start-button {
     padding: clamp(1.25rem, 3.5vw, 2rem) clamp(2.5rem, 6vw, 4.5rem);
@@ -343,15 +436,6 @@
   .start-button:active {
     transform: scale(0.96);
   }
-  .parent-setup-button {
-    padding: 0.55rem 0.85rem;
-    color: var(--muted);
-    background: transparent;
-    border: 1px solid rgb(255 255 255 / 0.22);
-    border-radius: 999px;
-    cursor: pointer;
-  }
-  .parent-setup-button:hover { color: var(--ink); border-color: var(--accent); }
 
   @keyframes smashPulse {
     0%, 100% {
@@ -364,27 +448,66 @@
     }
   }
 
-  .settings { width: min(620px, calc(100% - 2rem)); max-height: min(720px, calc(100% - 2rem)); margin: auto; padding: 0; color: var(--ink); background: var(--panel); border: 0; border-radius: 16px; }
+  /* --pad is shared by the form and by the sticky header/footer, which cancel it with
+     negative margins so they span the full panel width. */
+  .settings { --pad: clamp(1.25rem, 4vw, 2rem); width: min(620px, calc(100% - 2rem)); max-height: min(720px, calc(100% - 2rem)); margin: auto; padding: 0; color: var(--ink); background: var(--panel); border: 0; border-radius: 16px; }
   .settings::backdrop { background: rgb(2 7 16 / 0.82); }
-  .settings form { display: grid; gap: 1.5rem; padding: clamp(1.25rem, 4vw, 2rem); }
-  .settings header { display: flex; align-items: start; justify-content: space-between; gap: 2rem; }
+  .settings form { display: grid; gap: 1.5rem; padding: var(--pad); }
+
+  /* Sticky so the way out is always on screen: the panel scrolls ~185px of content,
+     and previously both the close button and the action row scrolled out of reach. */
+  .settings header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin: calc(var(--pad) * -1) calc(var(--pad) * -1) 0;
+    padding: var(--pad) var(--pad) 1rem;
+    background: var(--panel);
+    border-bottom: 1px solid rgb(255 255 255 / 0.09);
+  }
   .settings header p { color: var(--accent); font-size: 0.85rem; font-weight: 800; }
   .settings h2 { font-size: clamp(1.8rem, 5vw, 2.6rem); letter-spacing: -0.03em; }
-  .close-button { width: 2.5rem; height: 2.5rem; color: var(--ink); background: transparent; border: 1px solid rgb(255 255 255 / 0.22); border-radius: 50%; font-size: 1.6rem; cursor: pointer; }
+  .close-button { flex: none; width: 2.75rem; height: 2.75rem; color: var(--ink); background: transparent; border: 1px solid rgb(255 255 255 / 0.22); border-radius: 50%; font-size: 1.6rem; cursor: pointer; }
   .settings fieldset { padding: 0; border: 0; }
   .settings legend { margin-bottom: 0.75rem; font-weight: 800; }
-  .theme-list, .sound-list, .bg-motion-list { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-  .theme-list button, .sound-list button, .bg-motion-list button, .settings-actions button { padding: 0.65rem 0.85rem; color: var(--ink); background: var(--panel-strong); border: 1px solid transparent; border-radius: 10px; font-weight: 750; cursor: pointer; transition: background 150ms ease, color 150ms ease, transform 150ms ease; }
+
+  /* Equal columns: flex-wrap sized every button to its label, which left Embers and
+     Surprise Mix orphaned and made the short ones too small to hit comfortably. */
+  .theme-list, .sound-list, .bg-motion-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.6rem;
+  }
+  .theme-list button, .sound-list button, .bg-motion-list button, .settings-actions button { min-height: 2.75rem; padding: 0.65rem 0.85rem; color: var(--ink); background: var(--panel-strong); border: 1px solid transparent; border-radius: 10px; font-weight: 750; cursor: pointer; transition: background 150ms ease, color 150ms ease, transform 150ms ease; }
   .theme-list button:hover, .sound-list button:hover, .bg-motion-list button:hover { transform: translateY(-1px); }
   .theme-list button[aria-pressed="true"], .sound-list button[aria-pressed="true"], .bg-motion-list button[aria-pressed="true"] { color: #081426; background: var(--accent); font-weight: 850; }
-  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+  /* Every control in here is operated by an adult on a touchscreen, often one-handed:
+     44px minimum. The speech radio rows were 19px, under WCAG 2.2 AA's 24px floor. */
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; cursor: pointer; }
   .switch-row span { display: grid; }
   .switch-row small, .speech-mode small { color: var(--muted); }
-  .switch-row input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent); }
-  .speech-mode-options { display: grid; gap: 0.5rem; }
-  .speech-mode-options label { display: flex; align-items: center; gap: 0.55rem; color: var(--ink); font-weight: 750; }
-  .speech-mode-options input { width: 1.15rem; height: 1.15rem; accent-color: var(--accent); }
-  .settings-actions { display: flex; justify-content: space-between; gap: 1rem; }
+  .switch-row input { flex: none; width: 1.75rem; height: 1.75rem; accent-color: var(--accent); }
+  .speech-mode-options { display: grid; gap: 0.25rem; }
+  .speech-mode-options label { display: flex; align-items: center; gap: 0.65rem; min-height: 2.75rem; color: var(--ink); font-weight: 750; cursor: pointer; }
+  .speech-mode-options input { flex: none; width: 1.5rem; height: 1.5rem; accent-color: var(--accent); }
+
+  .settings-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 calc(var(--pad) * -1) calc(var(--pad) * -1);
+    padding: 1rem var(--pad) var(--pad);
+    background: var(--panel);
+    border-top: 1px solid rgb(255 255 255 / 0.09);
+  }
   .settings-actions .done-button { color: #081426; background: var(--accent); }
   noscript { position: fixed; inset: auto 1rem 1rem; padding: 1rem; color: #081426; background: var(--accent-2); }
 }
@@ -401,7 +524,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .start-button { animation: none; transition: none; }
-  .parent-setup-button { transition: none; }
   .bg-glow, .bg-stars { animation: none !important; }
   .virtual-keyboard-rows { transition: none; }
 }

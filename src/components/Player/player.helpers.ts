@@ -80,6 +80,46 @@ export function getChaosLabel(count: number): string {
   return 'Legendary chaos';
 }
 
+export type LetterSpeechMode = 'off' | 'names' | 'phonics';
+
+export interface PlayerSettings {
+  theme?: string;
+  bgMotion?: string;
+  sound?: string;
+  bgAnimation?: boolean;
+  soundOn?: boolean;
+  speech?: LetterSpeechMode;
+  reducedEffects?: boolean;
+}
+
+const SPEECH_MODES: readonly string[] = ['off', 'names', 'phonics'];
+
+/** Stored settings are user-writable, so keep only fields of the shape we expect. */
+export function parseSettings(raw: string | null): PlayerSettings {
+  let saved: unknown;
+  try {
+    saved = JSON.parse(raw ?? '');
+  } catch {
+    return {};
+  }
+  if (typeof saved !== 'object' || saved === null) return {};
+
+  const record = saved as Record<string, unknown>;
+  const settings: PlayerSettings = {};
+
+  for (const key of ['theme', 'bgMotion', 'sound'] as const) {
+    if (typeof record[key] === 'string') settings[key] = record[key] as string;
+  }
+  for (const key of ['bgAnimation', 'soundOn', 'reducedEffects'] as const) {
+    if (typeof record[key] === 'boolean') settings[key] = record[key] as boolean;
+  }
+  if (typeof record.speech === 'string' && SPEECH_MODES.includes(record.speech)) {
+    settings.speech = record.speech as LetterSpeechMode;
+  }
+
+  return settings;
+}
+
 export function getPlayAreaHeight(viewportHeight: number, keyboardTop: number): number {
   return Math.max(0, Math.min(viewportHeight, keyboardTop));
 }

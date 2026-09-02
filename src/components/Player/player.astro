@@ -10,6 +10,8 @@ import './player.css';
   </div>
   <canvas id="stage" aria-label="TinyFingers animation canvas"></canvas>
 
+  <button class="parent-hold" id="parent-hold" type="button" aria-label="Hold for three seconds to open parent controls"><span aria-hidden="true">⚙</span><span class="parent-hold-label">Hold for parent setup</span></button>
+
   <section class="virtual-keyboard" aria-label="Touch keyboard" aria-hidden="true" inert>
     <div class="virtual-keyboard-rows">
       {VIRTUAL_KEYBOARD_ROWS.map((row) => (
@@ -34,8 +36,9 @@ import './player.css';
 
   <section class="welcome" id="welcome">
     <div class="welcome-actions">
+      <h1 class="welcome-title">TinyFingers</h1>
+      <p class="welcome-hint">Bash any key. Every key does something.</p>
       <button class="start-button" id="start-button">Start smashing!</button>
-      <button class="parent-setup-button" id="parent-setup-button" type="button">Parent setup</button>
     </div>
   </section>
 
@@ -88,6 +91,7 @@ import './player.css';
 
       <div class="settings-actions">
         <button type="button" id="reset-score">Reset score</button>
+        <button type="button" id="stop-play">Finish play</button>
         <button class="done-button" value="close">Back to play</button>
       </div>
     </form>

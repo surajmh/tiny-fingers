@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CONSONANT_COLOR, NUMBER_EMOJIS, VOWEL_COLOR, getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, shouldShowVirtualKeyboard } from './player.helpers.ts';
+import { CONSONANT_COLOR, NUMBER_EMOJIS, VOWEL_COLOR, getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, parseSettings, shouldShowVirtualKeyboard } from './player.helpers.ts';
 
 test('normalizes printable and special keys', () => {
   assert.equal(getGlyph('a'), 'A');
@@ -60,4 +60,41 @@ test('labels each score band', () => {
   assert.equal(getChaosLabel(25), 'Getting wild');
   assert.equal(getChaosLabel(75), 'Maximum smash');
   assert.equal(getChaosLabel(150), 'Legendary chaos');
+});
+
+test('ignores stored settings that are missing or unreadable', () => {
+  assert.deepEqual(parseSettings(null), {});
+  assert.deepEqual(parseSettings(''), {});
+  assert.deepEqual(parseSettings('not json'), {});
+  assert.deepEqual(parseSettings('"a string"'), {});
+  assert.deepEqual(parseSettings('null'), {});
+});
+
+test('keeps only stored settings of the expected shape', () => {
+  assert.deepEqual(parseSettings(JSON.stringify({
+    theme: 'ocean',
+    bgMotion: 'embers',
+    sound: 'bell',
+    bgAnimation: false,
+    soundOn: true,
+    speech: 'phonics',
+    reducedEffects: true,
+  })), {
+    theme: 'ocean',
+    bgMotion: 'embers',
+    sound: 'bell',
+    bgAnimation: false,
+    soundOn: true,
+    speech: 'phonics',
+    reducedEffects: true,
+  });
+
+  assert.deepEqual(parseSettings(JSON.stringify({
+    theme: 42,
+    soundOn: 'yes',
+    speech: 'shouting',
+    reducedEffects: null,
+    somethingElse: 'ignored',
+    bgMotion: 'aurora',
+  })), { bgMotion: 'aurora' });
 });

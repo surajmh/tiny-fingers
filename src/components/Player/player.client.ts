@@ -1,5 +1,5 @@
 import { COLORS, MAX_GLYPHS, MAX_PARTICLES } from './player.constants';
-import { getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, shouldShowVirtualKeyboard, type InputVisual } from './player.helpers';
+import { getChaosLabel, getGlyph, getInputVisual, getLetterColor, getPhonicsSound, getPlayAreaHeight, isMilestone, parseSettings, shouldShowVirtualKeyboard, type InputVisual, type LetterSpeechMode } from './player.helpers';
 
 interface Particle {
   x: number;
@@ -60,7 +60,6 @@ if (!context) throw new Error('Canvas 2D is unavailable');
 
 const welcome = requireElement<HTMLElement>('#welcome');
 const startButton = requireElement<HTMLButtonElement>('#start-button');
-const parentSetupButton = requireElement<HTMLButtonElement>('#parent-setup-button');
 const scoreCount = requireElement<HTMLElement>('#score-count');
 const chaosLabel = requireElement<HTMLElement>('#chaos-label');
 const settings = requireElement<HTMLDialogElement>('#settings');
@@ -68,6 +67,7 @@ const bgAnimationToggle = requireElement<HTMLInputElement>('#bg-animation-toggle
 const soundToggle = requireElement<HTMLInputElement>('#sound-toggle');
 const letterSpeechModes = document.querySelectorAll<HTMLInputElement>('input[name="letter-speech-mode"]');
 const effectsToggle = requireElement<HTMLInputElement>('#effects-toggle');
+const parentHold = requireElement<HTMLButtonElement>('#parent-hold');
 const tabletTouchDevice = matchMedia('(min-width: 600px) and (hover: none) and (pointer: coarse)');
 
 let width = 0;
@@ -400,8 +400,17 @@ type SoundType = 'piano' | 'bell' | 'marimba' | 'arcade' | 'pop';
 const INSTRUMENTS: SoundType[] = ['piano', 'bell', 'marimba', 'arcade', 'pop'];
 let currentSoundChoice = 'mix';
 
+// A five-finger slap fires five smashes in the same millisecond; key repeat is worse.
+// Capping at one note per 40ms bounds oscillator churn and stops the mash turning to mud.
+const TONE_MIN_GAP_MS = 40;
+let lastToneAt = 0;
+
 function playTone(): void {
   if (!soundToggle.checked) return;
+
+  const startedAt = performance.now();
+  if (startedAt - lastToneAt < TONE_MIN_GAP_MS) return;
+  lastToneAt = startedAt;
 
   audioContext ??= new AudioContext();
   if (audioContext.state === 'suspended') audioContext.resume().catch(() => undefined);
@@ -460,8 +469,6 @@ function getPreferredSpeechVoice(): SpeechSynthesisVoice | undefined {
     ?? australianVoices[0]
     ?? speechVoices.find((voice) => voice.lang.toLowerCase().startsWith('en-'));
 }
-
-type LetterSpeechMode = 'off' | 'names' | 'phonics';
 
 function getLetterSpeechMode(): LetterSpeechMode {
   const selected = document.querySelector<HTMLInputElement>('input[name="letter-speech-mode"]:checked')?.value;
@@ -580,15 +587,16 @@ document.addEventListener('dragstart', (event) => event.preventDefault());
 document.addEventListener('drop', (event) => event.preventDefault());
 
 startButton.addEventListener('click', begin);
-parentSetupButton.addEventListener('click', openSettings);
 window.addEventListener('resize', scheduleResize, { passive: true });
 tabletTouchDevice.addEventListener('change', () => {
   updateVirtualKeyboardVisibility();
   scheduleResize();
 });
 
+// .virtual-keyboard covers the panel's padding and the gaps between keys: the canvas
+// stops where the panel starts, so a smash there would score and sound with nothing drawn.
 function canSmashTarget(target: EventTarget | null): boolean {
-  return !(target instanceof Element && target.closest('button, a, dialog, .welcome'));
+  return !(target instanceof Element && target.closest('button, a, dialog, .welcome, .virtual-keyboard'));
 }
 
 function smashAt(x: number, y: number): void {
@@ -606,6 +614,9 @@ window.addEventListener('touchstart', (event) => {
 }, { passive: true });
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
+    // Lockdown only needs to hold during play. Swallowing Escape here would also
+    // block the dialog's own dismissal, which is the key a parent reaches for first.
+    if (settings.open) return;
     event.preventDefault();
     startEscapeHold();
     return;
@@ -634,10 +645,9 @@ window.addEventListener('keydown', (event) => {
 }, { capture: true });
 
 window.addEventListener('keyup', (event) => {
-  if (event.key === 'Escape') {
-    event.preventDefault();
-    cancelEscapeHold();
-  }
+  if (event.key !== 'Escape') return;
+  cancelEscapeHold();
+  if (!settings.open) event.preventDefault();
 }, { capture: true });
 window.addEventListener('blur', cancelEscapeHold);
 
@@ -658,32 +668,40 @@ for (const button of document.querySelectorAll<HTMLButtonElement>('[data-play-ke
   });
 }
 
+function setPressed(attribute: string, value: string): void {
+  for (const option of document.querySelectorAll<HTMLButtonElement>(`[${attribute}]`)) {
+    option.setAttribute('aria-pressed', String(option.getAttribute(attribute) === value));
+  }
+}
+
+function applyTheme(id: string): void {
+  player.dataset.theme = id;
+  setPressed('data-theme-choice', id);
+}
+
+function applyBgMotion(id: string): void {
+  player.dataset.bgMotion = id;
+  setPressed('data-bg-choice', id);
+}
+
+function applySoundChoice(id: string): void {
+  currentSoundChoice = id;
+  setPressed('data-sound-choice', id);
+}
+
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')) {
-  button.addEventListener('click', () => {
-    player.dataset.theme = button.dataset.themeChoice;
-    for (const option of document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')) {
-      option.setAttribute('aria-pressed', String(option === button));
-    }
-  });
+  button.addEventListener('click', () => applyTheme(button.dataset.themeChoice ?? 'space'));
 }
 
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-sound-choice]')) {
   button.addEventListener('click', () => {
-    currentSoundChoice = button.dataset.soundChoice ?? 'piano';
-    for (const option of document.querySelectorAll<HTMLButtonElement>('[data-sound-choice]')) {
-      option.setAttribute('aria-pressed', String(option === button));
-    }
+    applySoundChoice(button.dataset.soundChoice ?? 'piano');
     playTone();
   });
 }
 
 for (const button of document.querySelectorAll<HTMLButtonElement>('[data-bg-choice]')) {
-  button.addEventListener('click', () => {
-    player.dataset.bgMotion = button.dataset.bgChoice;
-    for (const option of document.querySelectorAll<HTMLButtonElement>('[data-bg-choice]')) {
-      option.setAttribute('aria-pressed', String(option === button));
-    }
-  });
+  button.addEventListener('click', () => applyBgMotion(button.dataset.bgChoice ?? 'galaxy'));
 }
 
 bgAnimationToggle.addEventListener('change', () => {
@@ -705,6 +723,65 @@ requireElement<HTMLButtonElement>('#reset-score').addEventListener('click', () =
   score = 0;
   updateScore();
 });
+requireElement<HTMLButtonElement>('#stop-play').addEventListener('click', () => {
+  settings.close();
+  stopPlay();
+});
+
+parentHold.addEventListener('pointerdown', startEscapeHold);
+for (const name of ['pointerup', 'pointercancel', 'pointerleave']) {
+  parentHold.addEventListener(name, cancelEscapeHold);
+}
+
+const SETTINGS_KEY = 'tinyfingers-settings';
+
+function saveSettings(): void {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      theme: player.dataset.theme,
+      bgMotion: player.dataset.bgMotion,
+      sound: currentSoundChoice,
+      bgAnimation: bgAnimationToggle.checked,
+      soundOn: soundToggle.checked,
+      speech: getLetterSpeechMode(),
+      reducedEffects: effectsToggle.checked,
+    }));
+  } catch {
+    // Private browsing or a full quota: play carries on, the choice just won't stick.
+  }
+}
+
+function loadSettings(): void {
+  let raw: string | null = null;
+  try {
+    raw = localStorage.getItem(SETTINGS_KEY);
+  } catch {
+    return;
+  }
+
+  const saved = parseSettings(raw);
+  if (saved.theme) applyTheme(saved.theme);
+  if (saved.bgMotion) applyBgMotion(saved.bgMotion);
+  if (saved.sound) applySoundChoice(saved.sound);
+  if (saved.soundOn !== undefined) soundToggle.checked = saved.soundOn;
+  if (saved.bgAnimation !== undefined) {
+    bgAnimationToggle.checked = saved.bgAnimation;
+    player.classList.toggle('no-bg-animation', !saved.bgAnimation);
+  }
+  if (saved.reducedEffects !== undefined) {
+    effectsToggle.checked = saved.reducedEffects;
+    reducedEffects = saved.reducedEffects;
+  }
+  if (saved.speech) {
+    const control = document.querySelector<HTMLInputElement>(`input[name="letter-speech-mode"][value="${saved.speech}"]`);
+    if (control) control.checked = true;
+  }
+}
+
+// Every control lives inside the dialog, so one pair of delegated listeners
+// catches all of them after their own handlers have updated state.
+settings.addEventListener('change', saveSettings);
+settings.addEventListener('click', saveSettings);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     cancelEscapeHold();
@@ -717,5 +794,6 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+loadSettings();
 updateVirtualKeyboardVisibility();
 resizeCanvas();
