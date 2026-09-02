@@ -1,0 +1,1 @@
+{"version":"0.0.1","configurations":[{"name":"tfp","runtimeExecutable":"pnpm","runtimeArgs":["exec","astro","preview","--port","4399"],"port":4399}]}

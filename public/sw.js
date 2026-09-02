@@ -2,6 +2,7 @@ const CACHE_NAME = 'tinyfingers-v2';
 const APP_SHELL = [
   '/',
   '/manifest.webmanifest',
+  '/icons/favicon-32.png',
   '/icons/tinyfingers-192.png',
   '/icons/tinyfingers-512.png',
   '/icons/apple-touch-icon.png',
