@@ -42,7 +42,7 @@ test('reserves the keyboard area from the rendering canvas', () => {
   assert.equal(getPlayAreaHeight(1200, 1600), 1200);
 });
 
-test('shows the virtual keyboard only in active tablet touch play', () => {
+test('shows the virtual keyboard only in active touch play', () => {
   assert.equal(shouldShowVirtualKeyboard(false, true), false);
   assert.equal(shouldShowVirtualKeyboard(true, false), false);
   assert.equal(shouldShowVirtualKeyboard(true, true), true);

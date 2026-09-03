@@ -1,6 +1,6 @@
 # TinyFingers
 
-TinyFingers is a fast fullscreen keyboard, pointer, and touch toy for toddlers, built with Astro and the Canvas API. It can be deployed as a Progressive Web App or packaged as an offline native tablet app for iPad and Android tablets.
+TinyFingers is a fast fullscreen keyboard, pointer, and touch toy for toddlers, built with Astro and the Canvas API. It can be deployed as a Progressive Web App or packaged as an offline native app for iPhone, iPad, and Android phones and tablets.
 
 ## Development and web build
 
@@ -16,18 +16,16 @@ The static web build is emitted to `dist/`. Deploy it with:
 pnpm deploy
 ```
 
-## Native tablet wrapper
+## Native app wrapper
 
 The project now contains a lean Capacitor 8 native wrapper with the permanent application identifier **`dev.surajmh.tinyfingers`**. The wrapper packages the built files locally, so the core play experience does not require a network connection after installation. Capacitor’s `webDir` is set to `dist/`, the directory that contains the final `index.html`, as required by Capacitor’s configuration model.[1]
 
-| Platform | Project location | Tablet-only policy | Current configuration |
+| Platform | Project location | Supported devices | Current configuration |
 |---|---|---|---|
-| iPad | `ios/App/App.xcodeproj` | iPad only | Xcode target device family is set to `2`; iPhone builds are excluded. |
-| Android | `android/` | Tablet-sized screens only | The manifest excludes `small` and `normal` screens and requires a smallest available width of at least `600dp`. This aligns with the common Android tablet threshold.[2] |
+| iOS | `ios/App/App.xcodeproj` | iPhone and iPad | Xcode target device family is set to `1,2`, so iPhone and iPad builds are both included. |
+| Android | `android/` | All screen sizes | The manifest applies no screen-size filter, so phones and tablets are supported. |
 
-Both portrait and landscape orientations remain enabled because TinyFingers adapts its full-screen play surface to either tablet orientation. During active play on a tablet touch device, an on-screen keyboard—numbers, letters, Space, and Go—makes the game playable without a physical keyboard or the operating system keyboard. It remains hidden on the dashboard and in laptop or desktop browsers. Native scrolling and WebView zoom are disabled, and the existing TinyFingers icon is used for both native targets.
-
-> Android display classifications differ across devices. The manifest provides the application-level device filter; before publishing, use the Play Console device catalog to confirm the exact Android tablet models you intend to support.
+Both portrait and landscape orientations remain enabled because TinyFingers adapts its full-screen play surface to either orientation. During active play on a touchscreen device — phone or tablet — an on-screen keyboard — numbers, letters, Space, and Go — makes the game playable without a physical keyboard or the operating system keyboard. The keyboard is sized proportionally to the screen and stays hidden on the dashboard and in laptop or desktop browsers. Native scrolling and WebView zoom are disabled, and the existing TinyFingers icon is used for both native targets.
 
 ### Daily native workflow
 

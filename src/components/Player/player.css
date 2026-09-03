@@ -522,6 +522,34 @@
   .virtual-key { min-height: clamp(2.25rem, 9vh, 3.5rem); }
 }
 
+/* Phones in portrait: the full five rows must fit above the play area, so keys,
+   gaps, and panel padding all scale down proportionally with the screen. */
+@media (max-width: 620px) and (orientation: portrait) {
+  .virtual-keyboard-rows { gap: 0.2rem; padding: 0.3rem; border-radius: 0.95rem; }
+  .virtual-keyboard-row { gap: 0.2rem; }
+  .virtual-key {
+    min-height: clamp(2.1rem, 6.2vh, 2.7rem);
+    font-size: clamp(0.9rem, 4.2vw, 1.1rem);
+    border-radius: 0.55rem;
+  }
+  .virtual-key.is-space, .virtual-key.is-action { font-size: clamp(0.7rem, 2.6vw, 0.9rem); }
+  .virtual-keyboard-actions { width: 100%; }
+}
+
+/* Landscape phones: height is the scarce axis, so keys stay short and wide.
+   Later than the 680px rule so it wins where both match. */
+@media (orientation: landscape) and (max-height: 480px) {
+  .virtual-keyboard-rows { gap: 0.18rem; padding: 0.26rem; }
+  .virtual-keyboard-row { gap: 0.18rem; }
+  .virtual-key {
+    min-height: clamp(1.75rem, 11vh, 2.3rem);
+    font-size: clamp(0.85rem, 2.2vw, 1.15rem);
+    border-radius: 0.5rem;
+  }
+  .virtual-key.is-space, .virtual-key.is-action { font-size: clamp(0.68rem, 1.6vw, 0.9rem); }
+  .virtual-keyboard-actions { width: 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .start-button { animation: none; transition: none; }
   .bg-glow, .bg-stars { animation: none !important; }

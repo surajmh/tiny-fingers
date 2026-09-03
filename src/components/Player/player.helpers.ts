@@ -158,6 +158,6 @@ export function getPlayAreaHeight(viewportHeight: number, keyboardTop: number): 
   return Math.max(0, Math.min(viewportHeight, keyboardTop));
 }
 
-export function shouldShowVirtualKeyboard(isPlaying: boolean, isTabletTouchDevice: boolean): boolean {
-  return isPlaying && isTabletTouchDevice;
+export function shouldShowVirtualKeyboard(isPlaying: boolean, isTouchDevice: boolean): boolean {
+  return isPlaying && isTouchDevice;
 }

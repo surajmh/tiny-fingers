@@ -68,7 +68,9 @@ const soundToggle = requireElement<HTMLInputElement>('#sound-toggle');
 const letterSpeechModes = document.querySelectorAll<HTMLInputElement>('input[name="letter-speech-mode"]');
 const effectsToggle = requireElement<HTMLInputElement>('#effects-toggle');
 const parentHold = requireElement<HTMLButtonElement>('#parent-hold');
-const tabletTouchDevice = matchMedia('(min-width: 600px) and (hover: none) and (pointer: coarse)');
+// Any touchscreen (phone or tablet) gets the on-screen keyboard: there is no physical
+// keyboard to bash, and a palm-slam on the keys is the whole point of the toy.
+const touchDevice = matchMedia('(hover: none) and (pointer: coarse)');
 
 let width = 0;
 let height = 0;
@@ -137,7 +139,7 @@ if ('speechSynthesis' in window) window.speechSynthesis.addEventListener('voices
 if (reducedEffects) player.classList.add('no-bg-animation');
 
 function updateVirtualKeyboardVisibility(): void {
-  const visible = shouldShowVirtualKeyboard(started, tabletTouchDevice.matches);
+  const visible = shouldShowVirtualKeyboard(started, touchDevice.matches);
   player.classList.toggle('show-virtual-keyboard', visible);
   virtualKeyboard.toggleAttribute('inert', !visible);
   virtualKeyboard.setAttribute('aria-hidden', String(!visible));
@@ -612,7 +614,7 @@ document.addEventListener('drop', (event) => event.preventDefault());
 
 startButton.addEventListener('click', begin);
 window.addEventListener('resize', scheduleResize, { passive: true });
-tabletTouchDevice.addEventListener('change', () => {
+touchDevice.addEventListener('change', () => {
   updateVirtualKeyboardVisibility();
   scheduleResize();
 });
